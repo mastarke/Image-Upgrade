@@ -1,0 +1,41 @@
+{%extends 'layout.html'%}
+
+
+
+{%block body%}
+
+<div class="jumbotron text-center">
+    <h1>Copied {{platform}} Images</h1>
+</div>
+
+<label>To load your image just copy the following command and past in your router:</label>
+<hr>
+{% if platform == 'asr9k-px' %}
+	<p>admin install add source tftp://&lt your tftp ip&gt{{tftp_dir}} {{pies_str}} synchronous activate prompt-level none </p>
+{% else %}
+    <p>install add source tftp://&lt your tftp ip&gt{{tftp_dir}}&nbsp;{{pies_str}}</p>
+{% endif %}
+
+
+<table class="table table-striped table-hover ">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Image</th>
+      <th>Output Directory</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for item in pies%}
+    <tr class="success">
+      <td>{{loop.index}}</td>
+      <td>{{item}}</td>
+      <td>{{tftp_dir}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table> 
+
+
+
+{%endblock%}

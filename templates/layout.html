@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Welcome to Auto MERIT!</title>
+
+       
+
+        <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <body>
+        {%include 'includes/_navbar.html'%}
+        <div class="container">
+            {% include '/includes/_messages.html'%}
+            {%block body%}{%endblock%}
+        </div>
+
+        <script src="//cdn.ckeditor.com/4.6.2/basic/ckeditor.js"></script>
+        <script type="text/javascript">
+            CKEDITOR.replace('editor')
+        </script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    </body>
+    <footer>
+        <p><center><small><small>&copy; 2017 Matthew Starkey | &copy;Cisco </small></small></center></p>
+    </footer>
+</html>
