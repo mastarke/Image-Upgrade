@@ -1,0 +1,48 @@
+{%extends 'layout.html'%}
+
+
+
+{%block body%}
+<div class="jumbotron text-center">
+    <h1>Copy Image</h1>
+</div>
+
+
+<form name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
+    <fieldset>
+    <legend>Select Image and Platform</legend>
+    <div class="form-group">
+	    <label style="padding-left: 2.2em" for="select" class="control-label">Image:</label>
+	    <select id="Image" class="form-control" name="image" style="width: 40%" >
+	        {% for item in cur_releases %}
+	            <option value="{{item}}">{{item}}</option>
+	        {% endfor %}
+	    </select>
+
+	    <label style="padding-left: 0.7em" for="select" class="control-label">Platform:</label>
+	    <select id="Platform" class="form-control" name="platform" style="width: 40%" >
+	        <option value="asr9k-x64">asr9k-x64</option>
+	        <option value="asr9k-px">asr9k-px</option>
+	        <option value="ncs5500">ncs5500</option>
+	    </select>
+	</div>
+<div class="form-group">
+    <button type="submit" class="btn btn-info" >Next</button>
+</div>
+</fieldset>
+</form>
+
+
+
+<script type="text/javascript">
+
+    $('#Image').select2({
+    placeholder: 'Select an image'
+    });
+
+     $('#Platform').select2({
+    placeholder: 'Select a platform'
+    });    
+</script>
+
+{%endblock%}

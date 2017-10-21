@@ -1,0 +1,132 @@
+{%extends 'layout.html'%}
+
+
+
+{%block body%}
+
+{% if request.method == 'POST' and copy_error == None%}
+    <div class="alert alert-dismissible alert-success">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Success!</strong> You successfully built a YAML file please check your directory for your job file.
+    </div>
+{% elif request.method == 'POST' and copy_error == True%}
+    <div class="alert alert-dismissible alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Warning!</strong> please ensure your file name and path are valid.
+    </div>
+{% else %}
+    <div class="alert alert-dismissible alert-info">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Welcome</strong> please fill in the form to build a YAML file or copy from this github 
+      <a target="_blank" href="https://wwwin-github.cisco.com/mastarke/merit_sample_files" class="alert-link">HERE</a>.
+    </div>
+{% endif %}
+
+<div class="jumbotron text-center">
+    <h1>YAML File Builder</h1>
+</div>
+
+<form class="container" id="needs-validation" method="POST" novalidate >
+  <div class="row">
+     <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Hostname</label>
+      <input type="text" class="form-control" id="validationCustom01" placeholder="RTR Hostname"  Name="rtr_name" required>
+      <div class="invalid-feedback">
+        Please provide RTR Hostname.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Console IP</label>
+      <input type="text" class="form-control" id="validationCustom02" placeholder="Console IP"  Name="console_ip" required>
+      <div class="invalid-feedback">
+        Please provide Console IP.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Console Port</label>
+      <input type="text" class="form-control" id="validationCustom03" placeholder="Console Port"  Name="console_port" required>
+      <div class="invalid-feedback">
+        Please provide Console port.
+      </div>
+    </div>
+     <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Mgmt IP</label>
+      <input type="text" class="form-control" id="validationCustom04" placeholder="Mgmt IP"  Name="mgmt_ip" required>
+      <div class="invalid-feedback">
+        Please provide RTR Mgmt IP.
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+     <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Username</label>
+      <input type="text" class="form-control" id="validationCustom05" placeholder="RTR Username"  Name="rtr_username" required>
+      <div class="invalid-feedback">
+        Please provide RTR Username.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Router Password</label>
+      <input type="text" class="form-control" id="validationCustom06" placeholder="RTR Password"  Name="rtr_password" required>
+      <div class="invalid-feedback">
+        Please provide RTR Password.
+      </div>
+    </div>
+     <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Ixia Chassis IP</label>
+      <input type="text" class="form-control" id="validationCustom07" placeholder="Ixia Chassis IP"  Name="ixia_chassis_ip" required>
+      <div class="invalid-feedback">
+        Please provide Ixia Chassis IP.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Ixia VM IP (tcl_server)</label>
+      <input type="text" class="form-control" id="validationCustom08" placeholder="Your VM where tcl_server is running"  Name="ixia_vm_tcl_server_ip" required>
+      <div class="invalid-feedback">
+        Please provide Ixia VM IP.
+      </div>
+    </div>
+    </div>
+    <br>
+
+    <div class="row">
+       <div class="col-md-6 mb-3">
+        <label for="validationCustom05">YAML File Name</label>
+        <input type="text" class="form-control" id="validationCustom09" placeholder="Name your yaml file"  Name="yaml_file_name" required>
+        <div class="invalid-feedback">
+          Please provide a name for your YAML file.
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="validationCustom05">TFTP Location</label>
+        <input type="text" class="form-control" id="validationCustom10" placeholder="Your tftp location"  Name="tftp_loc" required>
+        <div class="invalid-feedback">
+          Please provide your tftp path.
+        </div>
+      </div>
+    </div>
+  <button class="btn btn-primary" type="submit">Submit form</button>
+</form>
+
+
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+
+  window.addEventListener('load', function() {
+    var form = document.getElementById('needs-validation');
+    form.addEventListener('submit', function(event) {
+      if (form.checkValidity() === false) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  }, false);
+})();
+</script>
+
+{%endblock%}

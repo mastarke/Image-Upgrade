@@ -1,0 +1,52 @@
+{%extends 'layout.html'%}
+{%block body%}
+
+
+<style type="text/css">
+
+.centerVideo {
+    display:block; margin: 0 auto;
+}
+
+</style>
+
+
+<div class="jumbotron text-center">
+<center><h1>About AutoMerit</h1></center>
+</div>
+
+
+<div class="jumbotron text-center">
+<center>
+	<h4>GitHub Sample files can be found
+		<a href="https://wwwin-github.cisco.com/mastarke/merit_sample_files" target="_blank"> here</a>
+	</h4>
+</center>
+</div>
+
+
+<center><h3>AutoMerit Introduction</h3></center>
+<div class="jumbotron text-center">
+<video width="800" height="800" controls class="centerVideo" 
+       poster="../static/img/autoMeritIntroimage.png">
+    <source src="../static/videos/autoMeritIntro.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+</div>
+
+
+<center><h3>AutoMerit explaining the script in more detail </h3></center>
+<div class="jumbotron text-center">
+<video width="800" height="800" controls class="centerVideo" 
+       poster="../static/img/autoMeritScriptDetail.png">>
+    <source src="../static/videos/autoMeritScriptDetail.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+</div>
+
+
+
+
+
+
+{%endblock%}

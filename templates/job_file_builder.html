@@ -1,0 +1,114 @@
+{%extends 'layout.html'%}
+
+
+
+{%block body%}
+
+{% if request.method == 'POST'%}
+    <div class="alert alert-dismissible alert-success">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Success!</strong> You successfully built a job file please check your directory for your job file.
+    </div>
+{% else %}
+    <div class="alert alert-dismissible alert-info">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Welcome</strong> please fill in the form to build a job file or copy from this github 
+      <a target="_blank" href="https://wwwin-github.cisco.com/mastarke/merit_sample_files" class="alert-link">HERE</a>.
+    </div>
+{% endif %}
+
+<div class="jumbotron text-center">
+    <h1>Job File Builder</h1>
+</div>
+
+<form class="container" id="needs-validation" method="POST" novalidate >
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="validationCustom01">YAML File Location</label>
+      <input type="text" class="form-control" id="validationCustom01" placeholder="Path to YAML" name ="yaml_file_loc" required>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="validationCustom02">Router Host Name</label>
+      <input type="text" class="form-control" id="validationCustom02" placeholder="RTR Host Name" name ="host_name" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="validationCustom03">Your TFTP Directory</label>
+      <input type="text" class="form-control" id="validationCustom03" placeholder="TFTP Directory" name="tftp_dir" required>
+      <div class="invalid-feedback">
+        Please provide a tftp directory.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom04">TFTP Server IP</label>
+      <input type="text" class="form-control" id="validationCustom04" placeholder="TFTP IP" name="tftp_ip" required>
+      <div class="invalid-feedback">
+        Please provide a valid tftp server ip.
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label for="validationCustom05">Image To Load</label>
+      <input type="text" class="form-control" id="validationCustom05" placeholder="6.3.2"  Name="load_image" required>
+      <div class="invalid-feedback">
+        Please provide a valid image.
+      </div>
+    </div>
+
+
+     <div class="col-md-3 mb-3">
+      <label for="validationCustom05">DB Name</label>
+      <input type="text" class="form-control" id="validationCustom06" placeholder="Profile Name"  Name="db_name" required>
+      <div class="invalid-feedback">
+        Please provide DB Name.
+      </div>
+    </div>
+
+     <div class="col-md-6 mb-3">
+      <label for="validationCustom01">PSAT Unzip Location</label>
+      <input type="text" class="form-control" id="validationCustom07" placeholder="Folder to unzip psat" name ="psat_unzip_loc" required>
+      <div class="invalid-feedback">
+        Please provide a valid psat unzip location.
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label for="validationCustom01">PSAT Job File Location</label>
+      <input type="text" class="form-control" id="validationCustom08" placeholder="Point to your job file" name ="psat_job_file_loc" required>
+      <div class="invalid-feedback">
+        Please provide a valid job file location.
+      </div>
+    </div>
+
+     <div class="col-md-6 mb-3">
+      <label for="validationCustom01">Job FIle Name</label>
+      <input type="text" class="form-control" id="validationCustom09" placeholder="my_script_job.py" name ="job_file_name" required>
+      <div class="invalid-feedback">
+        Please provide a valid name for this job file.
+      </div>
+    </div>
+
+  </div>
+  <br>
+  <button class="btn btn-primary" type="submit">Submit form</button>
+</form>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+
+  window.addEventListener('load', function() {
+    var form = document.getElementById('needs-validation');
+    form.addEventListener('submit', function(event) {
+      if (form.checkValidity() === false) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  }, false);
+})();
+</script>
+
+{%endblock%}

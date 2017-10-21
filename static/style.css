@@ -1,0 +1,11 @@
+table{
+    table-layout: fixed;
+    width: 300px;
+    margin: 0 auto; /* or margin: 0 auto 0 auto */
+}
+
+th, td {
+    width: 250px;
+    font-size : 130%;
+
+}

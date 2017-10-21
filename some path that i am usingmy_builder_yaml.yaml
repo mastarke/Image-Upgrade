@@ -1,0 +1,40 @@
+
+testbed:
+    name: noname
+    servers:
+        tftp:
+            address: 223.255.254.245
+            custom:
+                rootdir: /auto/tftpboot/mastarke
+            server: sj20lab-tftp4
+devices:
+    R1:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.1.100
+                port: 2016
+                protocol: telnet
+            vty_1:
+                protocol : telnet
+                ip : "1.83.57.88"
+            vty_2:
+                protocol : telnet
+                ip : "1.83.57.88"
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    ixia:
+        type: ixia
+        connections:
+            a:
+                protocol: ixia
+                ip: 172.27.2.200
+                tcl_server: 172.27.2.210:8009
+                username: ciscoUser
+    
