@@ -1,0 +1,32 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+    {%block content%}
+
+        {% if 'streams_with_loss' in queryKey%}
+            {% set class = 'danger' %}
+        {% else %}
+            {% set class = 'success' %}
+        {% endif %}
+
+        <table class="table table-striped table-hover ">
+          <thead>
+            <tr class='{{class}}'>
+              <th>#</th>
+              <th>Stream Name</th>
+              <th>Loss Value</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for key, value in streamDict[0][queryKey].items() %}
+            <tr>
+              <td>{{loop.index}}</td>
+
+              <td>{{key}}</td>
+              <td>{{value}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {%endblock%}
+{%endblock%}

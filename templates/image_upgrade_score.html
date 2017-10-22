@@ -1,0 +1,38 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+    <div class="container">
+        {% include 'hw_query_bar.html' %}
+    </div>
+
+    <div class="alert alert-dismissible alert-info">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p>Overall Score results for all <strong>{{os_type|safe}}</strong> runs on
+         database profile <strong>{{db_coll}}</strong></p>
+    </div>
+
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <div class="jumbotron text-center">
+        <div id="container" style="height: 400px"></div>
+            <script type="text/javascript">
+                var traffic_score = {{traffic_score|tojson}}
+                var psat_score = {{psat_score|tojson}}
+                var score_date = {{score_date|tojson}}
+                var final_score = {{final_score|tojson}}
+                var upgrade_time = {{upgrade_time|tojson}}
+                var os_type = {{os_type|tojson}}
+                var image_size = {{image_size|tojson}}
+            </script>
+            <script src="../static/image_upgrade_score.js"></script>
+    </div>
+
+    <div class="jumbotron text-center">
+        <div id="container1" style="height: 400px"></div>
+        <script src="../static/image_upgrade_time.js"></script>
+    </div>
+
+
+
+{%endblock%}

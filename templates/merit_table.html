@@ -1,0 +1,105 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+
+<style type="text/css">
+    table{
+        table-layout: fixed;
+        width: 300px;
+        margin: 0 auto; /* or margin: 0 auto 0 auto */
+    }
+
+    th, td {
+        width: 250px;
+        font-size : 130%;
+
+    }
+</style>
+
+<div>
+    <ul class="pagination pagination-sm">
+      <li class="disabled"><a href="/merit_table/{{tableDate}}/{{os_type}}/{{item}}">&laquo;</a></li>
+      {% for item in range(itemCount) %}
+      <li class="active"><a href="/merit_table/{{tableDate}}/{{os_type}}/{{item}}">{{item}}</a></li>
+      {% endfor %}
+      <li class="disabled" ><a href="/merit_table/{{tableDate}}/{{os_type}}/{{item}}">&raquo;</a></li>
+    </ul>
+</div>
+
+{%block content%}
+
+<link rel="stylesheet" href="../static/style.css">
+
+<div>
+    <table class="table table-striped table-hover ">
+      <thead>
+        <tr class='info'>
+          <th>#</th>
+          <th>Data</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+          {% for key, value in tableData.items() %}
+
+
+            {% if key == 'Traffic Score' and value >= 80%}
+                {% set class = 'success' %}
+            {% elif key == 'Traffic Score' and value >= 70%}
+                {% set class = 'warning' %}
+            {% elif key == 'Traffic Score' and value <= 69%}
+                {% set class = 'danger' %}
+            {% elif key == 'Trigger Score' and value >= 80%}
+                {% set class = 'success' %}
+            {% elif key == 'Trigger Score' and value >= 70%}
+                {% set class = 'warning' %}
+            {% elif key == 'Trigger Score' and value <= 69%}
+                {% set class = 'danger' %}
+            {% elif key == 'Merit Score' and value >= 80%}
+                {% set class = 'success' %}
+            {% elif key == 'Merit Score' and value >= 70%}
+                {% set class = 'warning' %}
+            {% elif key == 'Merit Score' and value <= 69%}
+                {% set class = 'danger' %}
+            {% else %}
+            {% set class = '' %}
+          {% endif %}
+
+        <tr class={{class}}>
+          <td>{{loop.index}}</td>
+          <td>{{key}}</td>
+            {% if key == 'Psat Url' %}
+                <td><a href={{value}} target="_blank">{{value}}</a></td>
+            {% elif key == 'Pre Streams with Loss'%}
+                {% set runDate = tableData['Run Date'] %}
+                {% set queryKey = 'pre_traffic_streams_with_loss' %}
+                <td><a href="/stream_table/{{tableData['Run Date']}}/{{queryKey}}/{{singleId}}">{{value}}</a></td>
+            {% elif key == 'Pre Stream without Loss'%}
+                {% set runDate = tableData['Run Date'] %}
+                {% set queryKey = 'pre_traffic_streams_with_no_loss' %}
+                <td><a href="/stream_table/{{tableData['Run Date']}}/{{queryKey}}/{{singleId}}">{{value}}</a></td>
+            {% elif key == 'Post Stream without Loss'%}
+                {% set runDate = tableData['Run Date'] %}
+                {% set queryKey = 'post_traffic_streams_with_no_loss' %}
+                <td><a href="/stream_table/{{tableData['Run Date']}}/{{queryKey}}/{{singleId}}">{{value}}</a></td>
+            {% elif key == 'Post Streams with Loss'%}
+                {% set runDate = tableData['Run Date'] %}
+                {% set queryKey = 'post_traffic_streams_with_loss' %}
+                <td><a href="/stream_table/{{tableData['Run Date']}}/{{queryKey}}/{{singleId}}">{{value}}</a></td>
+            {% elif key == 'Config Comparison Diff'%}
+                {% set runDate = tableData['Run Date'] %}
+                {% set queryKey = 'Config Comparison Diff' %}
+                <td><a href="/diff_config_checker/{{tableData['Run Date']}}/{{queryKey}}/{{singleId}}">{{value}}</a></td>
+            {% else %}
+                <td>{{value}}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+</div>
+
+{%endblock%}
+
+{%endblock%}

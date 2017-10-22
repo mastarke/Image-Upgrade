@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{%block body%}
+
+<div class="">
+
+	{%if selected_collection == None %}
+
+		<div id="TimedMessage" class="alert alert-dismissible alert-warning">
+			<h4>Warning!</h4>
+	  		<p>Please select a database currently it is set to {{selected_collection}}</p>
+	  		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+    
+    {% else %}
+    
+		<div id="TimedMessage" class="alert alert-dismissible alert-info">
+			<p>You are currently logged on t  <strong>{{selected_collection}}</strong> as your
+	  			databse. To change this please select an option from the dropdown box.</p>
+	  		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	  	</div>
+
+  	{% endif %}
+
+</div>
+
+<div class="container">
+    {% include 'db_query_bar.html' %}
+</div>
+
+<script type="text/javascript">
+	setTimeout(function() {
+	    $('#TimedMessage').fadeOut('fast');
+	}, 5000); // <-- time in milliseconds
+</script>
+
+	
+
+
+
+
+{%endblock%}

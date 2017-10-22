@@ -1,0 +1,102 @@
+<style type="text/css">
+    /* USED TO CHANGE SELECT2 SELECTOR BOX FONT COLOR TO BLACK */
+    .calendar-table, .glyphicon-calendar {color:black !important;}
+    .select2-results {color:black;}
+    .select2-selection--multiple .select2-selection__choice {
+        color:black;
+    }
+
+</style>
+
+<form name="HwQueryForm" action="{{ url_for('result') }}" method="POST">
+    <fieldset>
+    <legend>Select HW</legend>
+    <div class="form-group">
+    <label style="padding-left: 0.7em" for="select" class="control-label">RSP: </label>
+    <select id="rsp_type" class="form-control" name="Item_1" 
+            multiple="multiple" style="width: 40%" >
+        {% for item in rsp_types %}
+            <option value="{{item}}">{{item}}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label style="padding-left: 1.3em" for="select" class="control-label">LC:</label>
+    <select id="lc_type" class="form-control" name="Item_2" 
+            multiple="multiple" style="width: 40%" >
+        {% for item in lc_types %}
+            <option value="{{item}}">{{item}}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label  style="padding-left: 1.2em" for="select" class="control-label">OS: </label>
+    <select id="os_type" class="form-control" name="Item_3" 
+            multiple="multiple" style="width: 40%">
+        {% for item in os_types_in_db %}
+            <option value="{{item}}">{{item}}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label style="padding-left: 0.3em" for="select" class="control-label">Date:</label>
+    <input required style="width: 40%;" type="text" name="daterange" value="01/01/2015 01/31/2015" />
+</div>
+<div class="form-group">
+    <button type="submit" class="btn btn-success" >Submit</button>
+</div>
+</fieldset>
+</form>
+
+
+
+<script type="text/javascript">
+
+    $('#rsp_type').select2({
+    placeholder: 'Select a RSP type'
+    });
+
+    $('#lc_type').select2({
+    placeholder: 'Select a LC type'
+    });
+
+    $('#os_type').select2({
+    placeholder: 'Select a OS type'
+    });
+
+    $('#DB').select2({
+    placeholder: 'Select a DB'
+    });
+    
+</script>
+
+
+<!-- Include Required Prerequisites -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script> 
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+
+<script type="text/javascript">
+$('input[name="daterange"]').daterangepicker(
+{
+    locale: {
+      format: 'MM-DD-YYYY'
+    },
+    startDate: moment().subtract(90, 'days'),
+    endDate: moment()
+}, 
+function(start, end, label) {
+    console.log("A new date range was chosen: " + start.format('MM-DD-YYYY') + ' to ' + end.format('MM-DD-YYYY'));
+});
+
+// $('input[name="daterange"]').val('Select a date');
+</script>
+
+
+
+
+
+
+
+
+

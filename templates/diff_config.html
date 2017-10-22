@@ -1,0 +1,39 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+
+       
+{% if diff_config == '' %}
+    <div class="alert alert-dismissible alert-info"> 
+		<p>There appears to be no configuration lost. 
+	   	   You can check the upgrade script logs for the full pre and post configs.</p>
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+{% else %}
+    <div class="alert alert-dismissible alert-info"> 
+		<h4>Warning!</h4>
+		<p>Possible configuration lost. 
+		   You can check the upgrade script logs for full pre and post configuration details.</p>
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+{% endif %}
+
+
+
+<div>
+	{% for item in diff_config.split('\n') %}
+	    {% if item.startswith("-") %}
+            {% set color = 'red' %}
+			<p style="font-size:75%; padding-left: 40.0em; color:{{color}}">{{item}}</p>
+		{% elif item.startswith("+") %}
+			{% set color = '#33cc33' %}
+			<p style="font-size:75%; padding-left: 40.0em; color:{{color}}">{{item}}</p>
+
+		{% else %}
+		    {% set color = 'black' %}
+		    <p style="font-size:75%; padding-left: 40.0em; color:{{color}}">{{item}}</p>
+		{% endif %}
+	{% endfor %}
+</div>
+
+{%endblock%}

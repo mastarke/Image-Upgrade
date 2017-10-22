@@ -1,0 +1,34 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+    {%if query_result_count == 0 %}
+        <div class="alert alert-dismissible alert-danger">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <p>Sorry ...found {{query_result_count}} matches for RSP <strong>{{rsp_select}}</strong> LC <strong>{{lc_select}} and os {{os_type}} database {{db_coll}} starting from {{startDay}} ending on {{endDay}}</strong></p>
+        </div>
+    {% else %}
+        <div class="alert alert-dismissible alert-success">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <p>Success! found {{query_result_count}} matches for RSP <strong>{{rsp_select}}</strong> LC <strong>{{lc_select}} and os {{os_type}} database {{db_coll}} starting from {{startDay}} ending on {{endDay}}</strong></p>
+        </div>
+    {% endif %}
+
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <div class="jumbotron text-center">
+        <div id="container" style="height: 400px"></div>
+            <script type="text/javascript">
+                var traffic_score = {{traffic_score|tojson}}
+                var psat_score = {{psat_score|tojson}}
+                var score_date = {{score_date|tojson}}
+                var final_score = {{final_score|tojson}}
+                var os_type = {{os_type|tojson}}
+
+            </script>
+            <script src="../static/image_upgrade_score.js"></script>
+    </div>
+
+
+
+{%endblock%}

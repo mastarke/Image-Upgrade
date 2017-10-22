@@ -1,0 +1,37 @@
+<style type="text/css">
+    /* USED TO CHANGE SELECT2 SELECTOR BOX FONT COLOR TO BLACK */
+    .col-lg-2 control-label{float:left;}
+    .select2-results {color:black;}
+    .select2-selection--multiple .select2-selection__choice {
+        color:black;
+    }
+</style>
+
+
+<div class="fluid-container">
+
+    <form class="" action="{{ url_for('db_selected') }}" name="Item_1" method="POST">
+        <legend>Select a Database</legend>
+        <div class="form-group">
+        <label for="select" class="control-label">DB:</label>
+        <select id="DB" class="form-control" name="Item_4" style="width: 70%">
+            {% for item in coll_name %}
+                <option value="{{item}}">{{item}}</option>
+            {% endfor %}
+        </select>
+
+    </div>
+        <div class="form-group">
+            <button style="padding-left: 0.7em" type="submit" class="btn btn-success">Submit</button>
+        </div>
+    </form>
+
+</div>
+
+<script type="text/javascript">
+
+    $('#DB').select2({
+    placeholder: 'Select a database'
+    });
+    
+</script>
