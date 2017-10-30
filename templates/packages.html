@@ -8,37 +8,64 @@
     <h1>Select Pies and TFTP Path</h1>
 </div>
 
-<form name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
-    <fieldset>
-    <legend>Select Release</legend>
-    <div class="form-group">
-	    <label style="padding-left: 0.7em" for="select" class="control-label">Pies:</label><br>
-	    <select id="Pies" class="form-control" name="pies" style="width: 40%" multiple="multiple">
-	        {% for item in pies %}
-	            <option value="{{item}}">{{item}}</option>
-	        {% endfor %}
-	    </select>
-        <br><br>
-	   <div class="form-group">
-            <label style="padding-left: 0.7em" for="select" class="control-label">TFTP Path:</label>
-	        <input class="form-control" name="tftp_dir" class="" id="tftp_dir" style="width: 40%" type="text" value="your tftp path">
-	   </div>
-        <div class="form-group">
-            <label style="padding-left: 0.7em" for="select" class="control-label">TFTP Server IP:</label>
-            <input class="form-control" name="tftp_server_ip" id="tftp_server_ip" style="width: 40%" type="text" value="223.255.254.245">
-       </div>
-      
-<div class="form-group">
-    <button type="submit" class="btn btn-info" >Next</button>
-</div>
-</fieldset>
+{% if ping_result == True %}
+  <div class="alert alert-dismissible alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+   <p>Testbed for {{rtr_mgmt_ip}} is reachable.</p>
+  </div>
+{% else %}
+  <div class="alert alert-dismissible alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable.
+     you can still copy the command above and directly paste in your router.</p>
+  </div>
+{% endif %}
+   
+<form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
+  <div style="padding-left: 1.0em" class="row">
+        <label style="" for="select" class="control-label">Pies:</label><br>
+        <select id="Pies" name="pies" style="width: 82%" multiple="multiple">
+            {% for item in pies %}
+                <option value="{{item}}">{{item}}</option>
+            {% endfor %}
+        </select>
+    </div>
+  <button class="btn btn-info" type="submit">Next</button>
 </form>
+<br><br>
+
+{% if ping_result == True %}
+<h4>Currently installed packages on router</h4>
+<hr>
+   {% for line in install_output.split('\n') %}
+        <small>{{line}}</small><br>
+    {% endfor %}
+
+{%endif%}
 
 <script type="text/javascript">
 
     $('#Pies').select2({
     placeholder: 'Select an image'
     }); 
+</script>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+
+  window.addEventListener('load', function() {
+    var form = document.getElementById('needs-validation');
+    form.addEventListener('submit', function(event) {
+      if (form.checkValidity() === false) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  }, false);
+})();
 </script>
 
 

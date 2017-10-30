@@ -7,29 +7,91 @@
     <h1>Copy Image</h1>
 </div>
 
-
-<form name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
-    <fieldset>
-    <legend>Select Image and Platform</legend>
-    <div class="form-group">
-	    <label style="padding-left: 2.2em" for="select" class="control-label">Image:</label>
-	    <select id="Image" class="form-control" name="image" style="width: 40%" >
+<form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
+  <div style="padding-left: 1.0em" class="row">
+        
+        <label  for="select" class="control-label">Image:</label><br>
+	    <select id="Image" class="form-control" name="image" style="width: 82%" >
 	        {% for item in cur_releases %}
 	            <option value="{{item}}">{{item}}</option>
 	        {% endfor %}
 	    </select>
-
-	    <label style="padding-left: 0.7em" for="select" class="control-label">Platform:</label>
-	    <select id="Platform" class="form-control" name="platform" style="width: 40%" >
+    </div>
+    <br>
+    <div style="padding-left: 1.0em" class="row">
+    	<label style="" for="select" class="control-label">Platform:</label><br>
+	    <select id="Platform" class="form-control" name="platform" style="width: 82%" >
 	        <option value="asr9k-x64">asr9k-x64</option>
 	        <option value="asr9k-px">asr9k-px</option>
 	        <option value="ncs5500">ncs5500</option>
+	        <option value="ncs5500">xrv9k</option>
 	    </select>
-	</div>
-<div class="form-group">
-    <button type="submit" class="btn btn-info" >Next</button>
-</div>
-</fieldset>
+    </div>
+    <br>
+
+    
+    <div class="row">
+        <div class="col-md-10 mb-3">
+          <label for="validationCustom03">TFTP Directory Path:</label>
+          <input type="text" class="form-control" id="validationCustom01" placeholder="TFTP Path" name="tftp_dir" required>
+          <div class="invalid-feedback">
+            Please provide a valid TFTP Path.
+          </div>
+          <br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="validationCustom04">TFTP Server IP:</label>
+          <input type="text" class="form-control" id="validationCustom02" placeholder="TFTP Server IP" name="tftp_server_ip" required>
+          <div class="invalid-feedback">
+            Please provide a valid TFTP Server IP.
+          </div>
+        </div>
+    
+    
+        <div class="col-md-3 mb-3">
+          <label for="validationCustom05">RTR Mgmt IP:</label>
+          <input type="text" class="form-control" id="validationCustom03" placeholder="RTR Mgmt IP" name="rtr_mgmt_ip" required>
+          <div class="invalid-feedback">
+            Please provide a valid RTR Mgmt IP.
+          </div>
+          <br>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="validationCustom05">RTR Hostname:</label>
+          <input type="text" class="form-control" id="validationCustom03" placeholder="RTR Mgmt Hostname" name="rtr_hostname" required>
+          <div class="invalid-feedback">
+            Please provide a valid RTR Mgmt IP.
+          </div>
+          <br>
+        </div>
+    </div>
+    
+
+     <div class="row">
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">RTR Username:</label>
+          <input type="text" class="form-control" id="validationCustom04" placeholder="Username" name="rtr_username" required>
+          <div class="invalid-feedback">
+            Please provide a valid Router Username.
+          </div>
+          <br>
+        </div>
+
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">RTR Password:</label>
+          <input type="text" class="form-control" id="validationCustom05" placeholder="Password" name="rtr_password" required>
+          <div class="invalid-feedback">
+            Please provide a valid Router Username.
+          </div>
+          <br>
+        </div>
+    </div>
+    
+
+  <button class="btn btn-info" type="submit">Next</button>
 </form>
 
 
@@ -43,6 +105,25 @@
      $('#Platform').select2({
     placeholder: 'Select a platform'
     });    
+</script>
+
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+
+  window.addEventListener('load', function() {
+    var form = document.getElementById('needs-validation');
+    form.addEventListener('submit', function(event) {
+      if (form.checkValidity() === false) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  }, false);
+})();
 </script>
 
 {%endblock%}

@@ -1,0 +1,86 @@
+#set spath $env(XBU_SHARED)/psat-ng
+#set spath /auto/merit/ats5.3.0/sophiak/jobs
+set spath $env(ENA_TESTS)/psat
+
+set PE1  AG2_2
+set TGN  RT
+
+#Do not change the labels below
+set rtrLabelList "{PE1 $PE1} {TGN $TGN}"
+
+#set value(connection) ssh
+
+if { ![info exists ::env(TESTBED)] } {
+    set ::env(TESTBED) RJIL-SJC-AG2_2
+}
+
+#set runIds { AG3_2_to_SAR1_SAR2_Link_failure AG3_2_to_all_AG2s_Link_failure RemoveAddMplsLdpGR RedSwitchRPFO RemoveAddBreakoutConfigAG3_2 \
+#             DeleteInterfaceInISIS FlapBgp RemoveInterfaceVrf RunCustomClearCommand RemoveAddMplsLdp }
+#set runIds { ClearCounters }
+#set runIds { RedSwitchRPFO RemoveAddIntfsUnderXC }
+
+ats_run $spath/psat.tcl -aetest_testbed $env(TESTBED) \
+    -rtrLabelList $rtrLabelList \
+    -collection {PSAT viking-lib} \
+    -cfg "/auto/nest/ats5.3.0/mdattani/jobs/RJIL/rjil_nest_cfg.tcl" \
+    -UUT PE1 \
+    -enaManageLog 1 \
+    -numTelnets 5 \
+    -configs {{ \
+        {PE1 {\
+            {active-ip "1.57.37.176"} \
+            {standby-ip "1.57.37.160"} \
+            {username "lab"} \
+            {password "lab"} \
+            }} \
+    }} \
+    -useTGN 0 \
+    -checkTrafficLoss 0 \
+    -tb_tftp_server_addr 223.255.254.245 \
+    -tb_tftp_dir         psat \
+    -tb_tftp_path        /auto/tftp-merit/mdattani1/ \
+    -verificationList [list  verifyMplsLdpSummary \
+                             verifyShowPlatform \
+                             verifyIsisShowIsisNeighbors \
+                             verifySysLogErrors ] \
+    -triggerList [list psat_triggerDscStdbyRpOir \
+                       psat_triggerRedSwitchRPFO ] \
+    -repeatAllTriggers           1 \
+-TGN_KEY { \
+         {Session1 { \
+                   {Address "172.31.233.33 8009"} \
+                   {portList { }} \
+                   {Type "IXIA"} \
+                   {SessionFile {test_psat.ixncfg}} \
+                   {SessionAlreadyUp "true"} \
+                   {SessionLabel "psat"} \
+                   {controller       "172.27.138.167" } \
+                   {Handle           "8009"} \
+         }} \
+        }
+
+#                                verifyShowPimSummary \
+#                                verifyMribIpv4RouteSummary \
+#                                verifyMribIpv6RouteSummary \
+#                                verifyMfibHwRouteSum \
+#                                verifyBgpSessions \
+#                                verifyIsisShowIsisNeighbors \
+#                                verifyRouteIpv4Summary \
+#                                verifyBgpBfdSession \
+#                                verifyIsisIpv4BfdSessions \
+#                                verifyCefPlatformOor_loc_0 \
+#                                verifyCefPlatformOor_loc_6 \
+#    -triggerList [list psat_triggerDeleteInterfaceInISIS \
+#                       psat_triggerRemoveInterfaceVrf \
+#                       psat_triggerRedSwitchRPFO \
+#                       psat_triggerRestart-bgp \
+#                       psat_triggerRestart-isis \
+#                       psat_triggerRemoveAddBreakoutConfigSAR2 \
+#                       psat_triggerFlapEdgeBundleMemEtherLink \
+#                       psat_triggerReloadLocRPFO \
+#                       psat_triggerFlapBgp \
+#                       psat_triggerRemoveAddMplsLdp \
+#                       psat_triggerDRPStandbyReload \
+#                       psat_triggerOirLocation \
+#                       psat_triggerRemoveAddBundleInterfaces ] \
+

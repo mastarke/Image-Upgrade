@@ -7,13 +7,45 @@
 <div class="jumbotron text-center">
     <h1>Copied {{platform}} Images</h1>
 </div>
+<div>
+  <label>To load your image just copy the following command and past in your router:</label>
+  <hr>
+  <p>{{install_cmd}}</p>
+</div>
 
-<label>To load your image just copy the following command and past in your router:</label>
-<hr>
-{% if platform == 'asr9k-px' %}
-	<p>admin install add source tftp://{{tftp_server_ip}}{{tftp_dir}} {{pies_str}} synchronous activate prompt-level none </p>
+{% if ping_result == True %}
+  <div class="alert alert-dismissible alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+   <p>Testbed for {{rtr_mgmt_ip}} is reachable.</p>
+  </div>
 {% else %}
-    <p>install add source tftp://{{tftp_server_ip}}{{tftp_dir}}&nbsp;{{pies_str}}</p>
+  <div class="alert alert-dismissible alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable.
+     you can still copy the command above and directly paste in your router.</p>
+  </div>
+{% endif %}
+
+{% if ping_result == True %}
+  <form class="form-horizontal" action="{{ url_for('install_on_rtr') }}" method="POST">
+    <fieldset>
+      <legend>Install on router</legend>
+      <div class="form-group">
+        <label for="select" class="col-lg-2 control-label">Attempt to load on router</label><br>
+        <div class="col-lg-10">
+          <select class="form-control" id="select" name="install_on_rtr">
+            <option value="None">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-lg-10 col-lg-offset-2">
+          <button type="submit" class="btn btn-info">Submit</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
 {% endif %}
 
 
@@ -27,7 +59,7 @@
   </thead>
   <tbody>
   	{% for item in pies%}
-    <tr class="success">
+    <tr class="primary">
       <td>{{loop.index}}</td>
       <td>{{item}}</td>
       <td>{{tftp_dir}}</td>

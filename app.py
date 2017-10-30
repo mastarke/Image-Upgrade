@@ -12,6 +12,18 @@ from collections import OrderedDict
 import re
 from bson import ObjectId
 import os
+from ats.log.utils import banner
+from ats.easypy import runtime
+from ats import aetest
+from ats.topology import loader
+from celery import Celery
+# from hltapi import Ixia
+from Flask_celery import make_celery
+import time
+from celery.result import AsyncResult
+from celery.utils.log import get_task_logger
+import uuid
+from unicon import Unicon
 
 
 app = Flask(__name__)
@@ -19,7 +31,36 @@ app = Flask(__name__)
 
 app.config['MONGO_HOST'] = 'mastarke-lnx-v2'
 app.config['MONGO_DBNAME'] = 'meritDB'
+
+
+# CELERY ARGUMENTS
+app.config['CELERY_BROKER_URL'] = 'amqp://localhost//'
+app.config['CELERY_RESULT_BACKEND'] = 'mongodb://mastarke-lnx-v1:27017/meritDB'
+
+
+app.config['CELERY_RESULT_BACKEND'] = 'mongodb'
+app.config['CELERY_MONGODB_BACKEND_SETTINGS'] = {
+    "host": "mastarke-lnx-v2",
+    "port": 27017,
+    "database": "meritDB", 
+    "taskmeta_collection": "flask_app_job_results",
+}
+
+app.config['CELERY_TASK_SERIALIZER'] = 'json'
+
+#Specify mongodb host and datababse to connect to
+celery = Celery('task',broker='mongodb://mastarke-lnx-v1:27017/jobs')
+
+#Loads settings for Backend to store results of jobs 
+# celery.config_from_object('celeryconfig')
+celery = make_celery(app)
+
+# LOGGER IS FOR CELERY TASK LOGGING
+logger = get_task_logger(__name__)
+
 app.selected_collection = None
+
+
 
 # INIT MONGODB
 mongo = PyMongo(app)
@@ -174,11 +215,157 @@ def get_rp_lc_hw_types(db_coll):
     return lc_types, rsp_types, os_types_in_db,
 
 
+def send_install_cmd(ip_addr, username, password, rtr_hostname, install_cmd, result=0):
+
+    """Used to send install command via pexpect. This is prefered as Csccon
+       does not handle the cXR install add command well."""
+
+    import pexpect
+    attempts = 4
+    rtr_hostname_result = False
+
+    for i in range(attempts):
+        app.logger.info('attempting to connected to rtr attempt {} of {} via ip: {}'
+                  .format(i, attempts, ip_addr))
+
+        # ATTEMPTING TELNET CONNECTION
+        child = pexpect.spawn('telnet {}'.format(ip_addr), timeout=90)
+
+        if child.isatty() == True and child.isalive() == True:
+            app.logger.info('Established connection to {} now sending '
+                             'username {} and password {}'.format(ip_addr,
+                                                           username, password))
+            app.logger.info('sending pexpect username')
+            child.expect ('Username: ', timeout=90)
+            child.sendline ('{}'.format(username))
+            data = child.before
+            str_data = str(data, 'utf-8')
+            for line in str_data.split('\n'):
+                app.logger.info(line)
+
+            child.expect ('Password:', timeout=90)
+            child.sendline ('{}'.format(password))
+            child.expect ('#')
+            data = child.before
+            str_data = str(data, 'utf-8')
+            for line in str_data.split('\n'):
+                app.logger.info(line)
+                if rtr_hostname in line:
+                    rtr_hostname_result = True
+                    app.logger.info('Pexpect successful found router prompt {} '
+                                     'telnet was successful'.format(rtr_hostname))
+            if rtr_hostname_result == True:
+                break
+            else:
+                app.logger.info('could not find router hostname '
+                            'prompt {}'.format(rtr_hostname))
+        else:
+            app.logger.info('connection was unsuccessful connection '
+                        'status = {}'.format(child.isatty()))
+            child.close()
+
+    app.logger.info('@@@ Pexpect logged into router \n'
+             'sending command : {} @@@'.format(install_cmd))
+    try:
+        child.sendline ('{}'.format(install_cmd))
+        child.expect ('#')
+    except:
+        app.logger.info('@@@ SENT INSTALL CMD VIA PEXPECT @@@')
+    child.close()
+
+    return result
+
+def dynamic_yaml(hostname, mgmt_ip, rtr_username, rtr_password):
+    yaml_file = {
+                    "testbed": {
+                        "name": "noname",
+                        "servers": {
+                            "tftp": {
+                                "address": "223.255.254.245",
+                                "custom": {
+                                    "rootdir": "/auto/tftpboot/mastarke"
+                                },
+                                "server": "sj20lab-tftp4"
+                            }
+                        }
+                    },
+                    "devices": {
+                        hostname: {
+                            "type": "asr9k-x64",
+                            "connections": {
+                                "a": {
+                                    "ip": "172.27.151.15",
+                                    "port": "2016",
+                                    "protocol": "telnet"
+                                },
+                                "vty_1": {
+                                    "protocol": "telnet",
+                                    "ip": mgmt_ip
+                                },
+                                "vty_2": {
+                                    "protocol": "telnet",
+                                    "ip": mgmt_ip
+                                }
+                            },
+                            "tacacs": {
+                                "login_prompt": "Username:",
+                                "password_prompt": "Password:",
+                                "username": rtr_username
+                            },
+                            "passwords": {
+                                "tacacs": rtr_password,
+                                "enable": rtr_password,
+                                "line": rtr_password
+                            }
+                        },
+                        "ixia": {
+                            "type": "ixia",
+                            "connections": {
+                                "a": {
+                                    "protocol": "ixia",
+                                    "ip": "172.27.152.13",
+                                    "tcl_server": "172.27.211.87:8009",
+                                    "username": "ciscoUser"
+                                }
+                            }
+                        }
+                    }
+                }
+
+    return yaml_file
+
+def install_active(ip_addr, username, password, result=0):
+    """Check if Pam is running on eXR router."""
+
+    import pexpect
+    import pprint
+    # LOGGING INTO ROUTER
+    print('Pexpect logging into router.')
+    child = pexpect.spawn('telnet {}'.format(ip_addr))
+    child.expect ('Username: ')
+    child.sendline ('{}'.format(username))
+    child.expect ('Password:', timeout=90)
+    child.sendline ('{}'.format(password))
+    child.expect ('#')
+    print('Pexpect going to admin prompt.')
+    child.sendline('show install active summary')
+    child.expect ('#')
+
+    output = child.before
+    # CONVERT TYPE BYTES TO STRING TYPE
+    str_output = output.decode('utf-8')
+    # CHECK IF PAM RESTART SCRIPT IS FOUND
+    for line in str_output.split('\n'):
+        print(line)
+
+    child.close()
+    return str_output
+        
 # INDEX
 @app.route('/', methods=['GET', 'POST'])
 def index():
-
-    return render_template('index.html')
+    
+    return render_template('index.html', image=image)
 
 
 # ABOUT
@@ -210,16 +397,53 @@ def packages():
     if request.method == 'POST':
         image = request.form['image']
         platform = request.form['platform']
-        
+        tftp_dir = request.form['tftp_dir']
+        tftp_server_ip = request.form['tftp_server_ip']
+        rtr_mgmt_ip = request.form['rtr_mgmt_ip']
+        rtr_hostname = request.form['rtr_hostname']
+        rtr_username = request.form['rtr_username']
+        rtr_password = request.form['rtr_password']
+    
 
         session['platform'] = platform
-        # session['tftp_server_ip'] = tftp_server_ip
+        session['tftp_dir'] = tftp_dir
+        session['tftp_server_ip'] = tftp_server_ip
+        session['rtr_mgmt_ip'] = rtr_mgmt_ip
+        session['rtr_hostname'] = rtr_hostname
+        session['rtr_username'] = rtr_username
+        session['rtr_password'] = rtr_password
+
         
-        # app.logger.info('Matthew tftp_server_ip is {}'.format(tftp_server_ip))
+
+        # ATTEMPT TO PING DEVICE 
+        ping_output = os.popen('ping {} -c 5'.format(rtr_mgmt_ip)).read()
+        ping_success_num = re.search(r'\d+ packets transmitted, +\d+ received, +(\d+)% packet loss', ping_output)
+        if int(ping_success_num.group(1)) <= 21:
+            app.logger.info('Matthew ping result is less than 20 so telnet to router')
+            ping_result = True
+        else:
+            app.logger.info('Matthew ping result was not good it was {}'.format(ping_success_num.group(1)))
+            ping_result = False
+
+        session['ping_result'] = ping_result
+
+        if ping_result == True:
+            install_output = install_active(rtr_mgmt_ip, rtr_username, rtr_password)
+            # # pass arguments to yaml file 
+            # yaml_file = dynamic_yaml(rtr_hostname, rtr_mgmt_ip, rtr_username, rtr_password)
+            # # load yaml file
+            # testbed = loader.load(yaml_file)
+            # rtr = testbed.devices[rtr_hostname]
+            # rtr.connect(via ='vty_1', alias = 'mgmt1')
+            # install_active = rtr.mgmt1.execute('show install active summary')
+            # rtr.mgmt1.disconnect()
+
+        
         
     command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
                  '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
-                 '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image,platform=platform))
+                 '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))
+    
     command_output = os.popen(command).read()
 
     dir_found = re.search(r'\/\w+\/\w+\/\w+\/.*', command_output)
@@ -233,7 +457,8 @@ def packages():
     packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
     pies = re.findall(r'\w+.*', packages)
     
-    return render_template('packages.html', pies=pies)
+    return render_template('packages.html', pies=pies, ping_result=ping_result, 
+                                            rtr_mgmt_ip=rtr_mgmt_ip, install_output=install_output)
 
 
 @app.route('/copycmd', methods=['GET', 'POST'])
@@ -241,13 +466,16 @@ def copycmd():
 
     image_repo = session.get('image_repo', None)
     platform = session.get('platform', None)
-    
 
+    tftp_dir = session.get('tftp_dir', None)
+    tftp_server_ip = session.get('tftp_server_ip', None)
+    ping_result = session.get('ping_result', None)
+    rtr_mgmt_ip = session.get('rtr_mgmt_ip', None)
+    
+    
     if request.method == 'POST':
         pies = request.form.getlist('pies')
-        tftp_dir = request.form['tftp_dir']
-        tftp_server_ip = request.form['tftp_server_ip']
-    
+
         pies_str = ' '.join(pies)
 
         for item in pies:
@@ -256,9 +484,39 @@ def copycmd():
             os.popen(copy_cmd).read()
             os.popen(chmod_cmd).read()
 
+        if platform == 'asr9k-px':
+            install_cmd = ('admin install add source tftp://{}{} {} synchronous '
+                        'activate prompt-level none'.format(tftp_server_ip, tftp_dir, pies_str))
+        else:
+            install_cmd = 'install add source tftp://{}{} {}'.format(tftp_server_ip, tftp_dir, pies_str)
+
+        session['install_cmd'] = install_cmd
+        
+    
     return render_template('copycmd.html', pies=pies, pies_str=pies_str, 
                                            tftp_dir=tftp_dir, platform=platform,
-                                           tftp_server_ip=tftp_server_ip)
+                                           tftp_server_ip=tftp_server_ip, install_cmd=install_cmd,
+                                           ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip)
+
+
+@app.route('/install_on_rtr', methods=['GET', 'POST'])
+def install_on_rtr():
+
+    rtr_mgmt_ip = session.get('rtr_mgmt_ip', None)
+    ping_result = session.get('ping_result', None)
+    rtr_username = session.get('rtr_username', None)
+    rtr_password = session.get('rtr_password', None)
+    rtr_hostname = session.get('rtr_hostname', None)
+    install_cmd = session.get('install_cmd', None)
+
+    if request.method == 'POST':
+        install_on_rtr = request.form['install_on_rtr']
+        app.logger.info('Matthew your in your new post request and install_on_rtr is {}'.format(install_on_rtr))
+
+
+        ping_result = send_install_cmd(rtr_mgmt_ip, rtr_username, rtr_password, rtr_hostname, install_cmd)
+
+    return render_template('install_on_rtr.html', ping_result=ping_result)
 
 
 @app.route('/job_file_builder', methods=['GET', 'POST'])
@@ -686,8 +944,135 @@ def diff_config_checker(runDate, queryKey, singleId):
                                                 diff_config=diff_config)
 
 
+@app.route('/process/')
+def process():
+
+
+    # yaml_file = dynamic_yaml(hostname='R6', mgmt_ip='1.83.57.88', rtr_username='root', rtr_password='root')
+    # logger.info('yaml file is {}'.format(yaml_file))
+    
+    # load yaml file
+    # testbed = loader.load(yaml_file)
+    # rtr = testbed.devices['R6']
+    
+
+   
+    # install_active = rtr.mgmt1.configure('interface tenGigE 0/0/0/0/0 shutdown')
+    
+    # rtr.mgmt2.disconnect()
+
+    # logger.info('### Task complete !!!  ###')
+
+    
+    result = script_runner.delay()
+    # script_runner()
+    # job_taskid = AsyncResult(result.task_id)
+
+    # app.logger.info('job_taskid type is {} and the type is {}'.format(job_taskid, type(str(job_taskid))))
+
+    # mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'telnet_scrpt_run'})
+    
+   
+
+    return 'async resquest sent'
+
+@app.route('/job_status')
+def job_status():
+
+
+    # get all task id's 
+    taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
+
+    # unpack taskid cursor object
+    taskid_list = []
+    for r in taskid_list_data:
+        try:
+            taskid_list.append(r['taskid'])
+        except:
+            app.logger.info('taskid key value not found in mongoDB')
+
+    # print task id
+    for item in taskid_list:
+        app.logger.info('for task id {} the status is {}'.format(item, script_runner.apply_async(task_id=item).state))
+
+        
+    return 'Hi from job status'
+
+
+@celery.task(name='app.script_runner')
+def script_runner():
+
+    jobfile = '''
+from ats.easypy import run
+import os
+
+class ScriptArgs(object):
+    """script related arguments"""
+    # MATTHEW CELERY JOB FILE
+    testbed_file = ('/ws/mastarke-sjc/my_local_git/merit/my_yaml.yaml')
+    rtr = 'R6'
+    base_image_repo = '/auto/prod_weekly_archive1/bin/'
+    user_tftp_dir = '/auto/tftp-merit/mastarke/'
+    tftp_ip = '223.255.254.245'
+    load_image = '6.3.2'
+
+    ### DATABASE ARGS ###
+    db_host = 'mastarke-lnx-v2'
+    db_name = 'meritDB'
+    db_collection = 'meritData'
+
+    ### PSAT ARGS ###
+    psat_unzip_output_folder = '/auto/tftp-sjc-users2/mastarke/psat/r6'
+    psat_job_file = '/auto/nest/ats5.3.0/mastarke/jobs/R6-repeat-trigger-psat.job'
+
+
+def main():
+    run(testscript=('/ws/mastarke-sjc/my_local_git/image_picker_site/basic_telnet_script.py'))
+'''
+    # CREATE UNIQUIE JOBFILE NAME
+    jobfilename = 'jobfile-' + str(uuid.uuid4()) + '.py'
+
+
+    with open(jobfilename, mode='w', encoding='utf-8') as a_file:
+        a_file.write(jobfile)   
+    
+    logger.info('###  Matthew in script_runner celery task  ###')
+    os.system('easypy {}'.format(jobfilename))
+    logger.info('###  !!!  Matthew in script_runner celery has now completed  !!!  ###')
+
+    logger.info('###  Matthew in script_runner removing jobfile {}  ###'.format(jobfilename))
+    os.system('rm {}'.format(jobfilename))
+
+
+
+
+
+
+# @celery.task()
+# def new():
+
+#     time.sleep(20)
+#     num = 5 + 5
+
+
+
+# @celery.task(serializer='json', name='app.script_runner')
+# def script_runner():
+
+
+    
+#     # pass arguments to yaml file 
+#     yaml_file = dynamic_yaml(hostname='R6', mgmt_ip='1.83.57.88', rtr_username='root', rtr_password='root')
+#     # load yaml file
+#     testbed = loader.load(yaml_file)
+#     rtr = testbed.devices['R6']
+#     rtr.connect(via ='vty_1', alias = 'mgmt1')
+#     install_active = rtr.mgmt1.configure('interface tenGigE 0/0/0/0/0 shutdown')
+#     rtr.mgmt1.disconnect()
+
+    
 
 
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
-    app.run(debug=True, port=1111, host='sjc-ads-4581')
+    app.run(debug=True, port=1111, host='mastarke-lnx-v2')

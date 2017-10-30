@@ -1,0 +1,78 @@
+set spath $env(XBU_SHARED)/psat-ng
+
+set PE1 R6
+set TGN  RT
+
+#Do not change the labels below
+set rtrLabelList "{PE1 $PE1} {TGN $TGN}"
+
+set connection ssh
+
+if { ![info exists ::env(TESTBED)] } {
+    set ::env(TESTBED) FAKE
+}
+
+
+ats_run $spath/psat-ng.tcl -aetest_testbed $env(TESTBED) \
+    -rtrLabelList $rtrLabelList \
+    -collection {PSAT viking-lib} \
+    -cfg "/auto/nest/ats5.3.0/mastarke/jobs/R6-nest-psat-cfg.tcl" \
+    -UUT PE1 \
+    -enaManageLog 0 \
+    -numTelnets 1 \
+    -configs {{ \
+        {PE1 {\
+            {active-ip "1.83.57.88"} \
+            {standby-ip "1.83.57.89"} \
+                {username "root"} \
+                {password "root"} \
+            }} \
+    }} \
+    -useTGN 1 \
+    -checkTrafficLoss 1 \
+    -tb_tftp_server_addr "223.255.254.245" \
+    -tb_tftp_server_name "sj20lab-as2" \
+    -tb_tftp_dir         psat \
+    -tb_tftp_path        /auto/tftp-merit/mastarke/ \
+       -verificationList [list verifyBgpSessions \
+                               verifyBgpNeighbors \
+                               verifyIsisAdjacencies \
+                               verifyIsisShowIsisIpv4Route \
+                               verifyMplsTeTunnels \
+                               verifyMplsForwardingSummary \
+                               verifyL2vpnXConnects \
+                               verifyL2vpnXConnectSummary \
+                               verifyL2vpnBridgeDomain \
+                               verifyImDatabaseIntf ] \
+    -triggerList [list psat_triggerClearCef \
+                       psat_triggerShutNoShutInterface \
+                       psat_triggerShutUnshutL2Intfs \
+                       psat_triggerRemoveCoreIpv4 \
+                       psat_triggerClearCmdV4RouteUni \
+                       psat_triggerClearArpCache \
+                       psat_triggerRemoveAddRsvp \
+                       psat_triggerRemoveAddMplsLdp \
+                       psat_triggerClearCounterBundleEther \
+                       psat_triggerRemoveAddIntfsUnderXC \
+                       psat_triggerClearCounters \
+                       psat_triggerFlapIsis \
+                       psat_triggerRemoveAllInterfaces \
+                       psat_triggerRemoveInterfaceVrf \
+                       psat_triggerRemoveLoopbackInterface \
+                       psat_triggerRemoveBundleInterface \
+                       psat_triggerProcessRestart \
+                       psat_triggerOirLocation \
+                       psat_triggerRedSwitchRPFO ] \
+    -repeatAllTriggers           1 \
+-TGN_KEY { \
+         {Session1 { \
+                   {Address "172.27.211.87 8009"} \
+                   {portList {2/3 7/5 7/1}} \
+                   {Type "IXIA"} \
+                   {SessionFile {test_psat.ixncfg}} \
+                   {SessionAlreadyUp "true"} \
+                   {SessionLabel "psat"} \
+                   {controller       "172.27.152.13" } \
+                   {Handle           "8009"} \
+         }} \
+        }

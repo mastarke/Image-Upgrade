@@ -1,0 +1,281 @@
+testbed:
+    name: noname
+    servers:
+        tftp:
+            address: 223.255.254.245
+            custom:
+                rootdir: /auto/tftpboot/mastarke
+            server: sj20lab-tftp4
+devices:
+    R1:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.15
+                port: 2012
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.58.233
+            vty_2:
+                protocol: telnet
+                ip: 1.83.58.233
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+        custom:
+            chassis_type: asr9k
+            hostname: R1
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.58.233
+    R2:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.58
+                port: 2013
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.58.155
+            vty_2:
+                protocol: telnet
+                ip: 1.83.58.155
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+        custom:
+            chassis_type: asr9k
+            hostname: R2
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.58.155
+    R3:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.58
+                port: 2015
+                protocol: telnet
+            calvados:
+                protocol: telnet
+                ip: "172.27.151.58"
+                port: 2004
+            vty_1:
+                protocol: telnet
+                ip: 1.83.57.82
+            vty_2:
+                protocol: telnet
+                ip: 1.83.57.82
+        custom:
+            chassis_type: asr9k
+            console_a: telnet 172.27.151.58 2015
+            console_b: telnet 172.27.151.58 2004
+            hostname: R3
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.57.82
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    R4:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.183
+                port: 2033
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.58.164
+            vty_2:
+                protocol: telnet
+                ip: 1.83.58.164
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+        custom:
+            chassis_type: asr9k
+            hostname: R4
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.58.164
+    R5:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.58
+                port: 2014
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.53.96
+            vty_2:
+                protocol: telnet
+                ip: 1.83.53.96
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    R6:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.15
+                port: 2016
+                protocol: telnet
+            b:
+                ip: 172.27.151.55
+                port: 2016
+                protocol: telnet
+            calvados:
+                protocol: telnet
+                ip: "172.27.151.15"
+                port: 2013
+            vty_1:
+                protocol : telnet
+                ip : "1.83.57.88"
+            vty_2:
+                protocol : telnet
+                ip : "1.83.57.88"
+        custom:
+            chassis_type: asr9k
+            console_a: telnet 172.27.151.15 2016
+            #console_b: telnet 172.27.151.55 2016
+            hostname: R6
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.53.27
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    R7:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.27.151.55
+                port: 2004
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.57.66
+            vty_2:
+                protocol: telnet
+                ip: 1.83.57.66
+        custom:
+            chassis_type: asr9k
+            hostname: R7
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.57.66
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    F1:
+        type: 'fretta'
+        connections:
+            a:
+                ip: 172.27.151.58
+                port: 2014
+                protocol: telnet
+            vty_1:
+                protocol: telnet
+                ip: 1.83.57.92
+            vty_2:
+                protocol: telnet
+                ip: 1.83.57.92
+        custom:
+            chassis_type: fretta
+            hostname: F1
+            mgt_intf: MgmtEth0/RSP0/CPU0/0
+            mgt_ip: 1.83.57.92
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    ixia:
+        type: ixia
+        connections:
+            a:
+                protocol: ixia
+                ip: 172.27.152.13
+                tcl_server: 172.27.211.87:8009
+                username: ciscoUser
+topology:
+    ixia:
+        interfaces:
+            7/1:
+                alias: tgen1_rtr2_intf.1
+                speed: ether10000
+                link_type: physical
+                peer:
+                - R2::tenGigE0/0/0/0
+                type: unkown
+            7/3:
+                alias: tgen1_rtr3_intf.1
+                speed: ether10000
+                link_type: physical
+                peer:
+                - R3::tenGigE0/2/0/35
+                type: unkown
+            # 7/5:
+            #     alias: tgen1_rtr3_intf.1
+            #     speed: ether10000
+            #     link_type: physical
+            #     peer:
+            #     - R3::tengigE0/1/0/4/0
+            #     type: unkown
+            7/2:
+                alias: tgen1_rtr4_intf.1
+                speed: ether10000
+                link_type: physical
+                peer:
+                - R4::tenGigE0/2/0/23
+                type: unkown
+            2/4:
+                alias: tgen1_rtr5_intf.1
+                speed: ether10000
+                link_type: physical
+                peer:
+                - R5::tenGigE0/0/1/1
+                type: unkown
+            2/2:
+                alias: tgen1_rtr6_intf.1
+                speed: ether10000
+                link_type: physical
+                peer:
+                - R6::tenGigE0/0/0/1/0
+                type: unkown
