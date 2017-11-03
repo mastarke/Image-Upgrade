@@ -5,14 +5,17 @@
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css">
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css">
 <div class="jumbotron text-center">
-    <h1>Select Pies and TFTP Path</h1>
+    <h1>Testbed Reachability</h1>
 </div>
 
 {% if ping_result == True %}
   <div class="alert alert-dismissible alert-success">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
-   <p>Testbed for {{rtr_mgmt_ip}} is reachable.</p>
+   <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. You may continue with upgrade</p>
   </div>
+  <form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
+      <button class="btn btn-info btn-lg" type="submit">Next</button>
+  </form>
 {% else %}
   <div class="alert alert-dismissible alert-danger">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -21,18 +24,6 @@
   </div>
 {% endif %}
    
-<form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
-  <div style="padding-left: 1.0em" class="row">
-        <label style="" for="select" class="control-label">Pies:</label><br>
-        <select id="Pies" name="pies" style="width: 82%" multiple="multiple">
-            {% for item in pies %}
-                <option value="{{item}}">{{item}}</option>
-            {% endfor %}
-        </select>
-    </div>
-  <button class="btn btn-info" type="submit">Next</button>
-</form>
-<br><br>
 
 {% if ping_result == True %}
 <h4>Currently installed packages on router</h4>
@@ -43,12 +34,7 @@
 
 {%endif%}
 
-<script type="text/javascript">
 
-    $('#Pies').select2({
-    placeholder: 'Select an image'
-    }); 
-</script>
 
 <script>
 // Example starter JavaScript for disabling form submissions if there are invalid fields

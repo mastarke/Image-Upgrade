@@ -8,6 +8,8 @@
     <h1>Install on RTR</h1>
 </div>
 
+<p>Your Task ID is {{job_taskid}}. Please keep this information to search your results</p>
+
 {% if ping_result == 0%}
   <div class="alert alert-dismissible alert-success">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -19,6 +21,7 @@
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     <p>Install command either failed or aborted.</p>
   </div>
+
 
 {% endif %}
 

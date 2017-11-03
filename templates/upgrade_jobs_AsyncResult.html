@@ -1,0 +1,32 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+<div class="jumbotron text-center">
+    <h1>Upgrade Job Status</h1>
+</div>
+
+<table class="table table-striped table-hover ">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Task ID</th>
+      <th>State</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for key, value in taskid_dict.items() %}
+  		
+    <tr class="">
+	      <td>{{loop.index}}</td>
+	      <td>{{key}}</td>
+	      <td>{{value}}</td>
+	      <td>Column content</td>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table> 
+
+{%endblock%}
+
+

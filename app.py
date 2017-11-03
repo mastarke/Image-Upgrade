@@ -220,58 +220,7 @@ def send_install_cmd(ip_addr, username, password, rtr_hostname, install_cmd, res
     """Used to send install command via pexpect. This is prefered as Csccon
        does not handle the cXR install add command well."""
 
-    import pexpect
-    attempts = 4
-    rtr_hostname_result = False
-
-    for i in range(attempts):
-        app.logger.info('attempting to connected to rtr attempt {} of {} via ip: {}'
-                  .format(i, attempts, ip_addr))
-
-        # ATTEMPTING TELNET CONNECTION
-        child = pexpect.spawn('telnet {}'.format(ip_addr), timeout=90)
-
-        if child.isatty() == True and child.isalive() == True:
-            app.logger.info('Established connection to {} now sending '
-                             'username {} and password {}'.format(ip_addr,
-                                                           username, password))
-            app.logger.info('sending pexpect username')
-            child.expect ('Username: ', timeout=90)
-            child.sendline ('{}'.format(username))
-            data = child.before
-            str_data = str(data, 'utf-8')
-            for line in str_data.split('\n'):
-                app.logger.info(line)
-
-            child.expect ('Password:', timeout=90)
-            child.sendline ('{}'.format(password))
-            child.expect ('#')
-            data = child.before
-            str_data = str(data, 'utf-8')
-            for line in str_data.split('\n'):
-                app.logger.info(line)
-                if rtr_hostname in line:
-                    rtr_hostname_result = True
-                    app.logger.info('Pexpect successful found router prompt {} '
-                                     'telnet was successful'.format(rtr_hostname))
-            if rtr_hostname_result == True:
-                break
-            else:
-                app.logger.info('could not find router hostname '
-                            'prompt {}'.format(rtr_hostname))
-        else:
-            app.logger.info('connection was unsuccessful connection '
-                        'status = {}'.format(child.isatty()))
-            child.close()
-
-    app.logger.info('@@@ Pexpect logged into router \n'
-             'sending command : {} @@@'.format(install_cmd))
-    try:
-        child.sendline ('{}'.format(install_cmd))
-        child.expect ('#')
-    except:
-        app.logger.info('@@@ SENT INSTALL CMD VIA PEXPECT @@@')
-    child.close()
+   
 
     return result
 
@@ -464,39 +413,12 @@ def packages():
 @app.route('/copycmd', methods=['GET', 'POST'])
 def copycmd():
 
-    image_repo = session.get('image_repo', None)
-    platform = session.get('platform', None)
-
-    tftp_dir = session.get('tftp_dir', None)
-    tftp_server_ip = session.get('tftp_server_ip', None)
+    
     ping_result = session.get('ping_result', None)
     rtr_mgmt_ip = session.get('rtr_mgmt_ip', None)
     
     
-    if request.method == 'POST':
-        pies = request.form.getlist('pies')
-
-        pies_str = ' '.join(pies)
-
-        for item in pies:
-            copy_cmd = 'cp {}/{} {}'.format(image_repo, item, tftp_dir)
-            chmod_cmd = 'chmod 777 {}/{}'.format(tftp_dir, item)
-            os.popen(copy_cmd).read()
-            os.popen(chmod_cmd).read()
-
-        if platform == 'asr9k-px':
-            install_cmd = ('admin install add source tftp://{}{} {} synchronous '
-                        'activate prompt-level none'.format(tftp_server_ip, tftp_dir, pies_str))
-        else:
-            install_cmd = 'install add source tftp://{}{} {}'.format(tftp_server_ip, tftp_dir, pies_str)
-
-        session['install_cmd'] = install_cmd
-        
-    
-    return render_template('copycmd.html', pies=pies, pies_str=pies_str, 
-                                           tftp_dir=tftp_dir, platform=platform,
-                                           tftp_server_ip=tftp_server_ip, install_cmd=install_cmd,
-                                           ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip)
+    return render_template('copycmd.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip)
 
 
 @app.route('/install_on_rtr', methods=['GET', 'POST'])
@@ -507,16 +429,54 @@ def install_on_rtr():
     rtr_username = session.get('rtr_username', None)
     rtr_password = session.get('rtr_password', None)
     rtr_hostname = session.get('rtr_hostname', None)
-    install_cmd = session.get('install_cmd', None)
+    platform = session.get('platform', None)
+    image_repo = session.get('image_repo', None)
+
+    tftp_dir = session.get('tftp_dir', None)
+    tftp_server_ip = session.get('tftp_server_ip', None)
+
 
     if request.method == 'POST':
         install_on_rtr = request.form['install_on_rtr']
-        app.logger.info('Matthew your in your new post request and install_on_rtr is {}'.format(install_on_rtr))
+        
+        result = script_runner.delay(rtr_hostname, rtr_mgmt_ip, rtr_username, 
+                                     rtr_password, platform, image_repo, tftp_dir, 
+                                     tftp_server_ip)
+
+        job_taskid = AsyncResult(result.task_id)
+        mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'telnet_scrpt_run'})
 
 
-        ping_result = send_install_cmd(rtr_mgmt_ip, rtr_username, rtr_password, rtr_hostname, install_cmd)
+    return render_template('install_on_rtr.html', ping_result=0, job_taskid=str(job_taskid))
 
-    return render_template('install_on_rtr.html', ping_result=ping_result)
+
+
+@app.route('/upgrade_jobs_AsyncResult', methods=['GET', 'POST'])
+def upgrade_jobs_AsyncResult():
+
+    taskid_dict = {}
+
+
+    # GET ALL TASK ID'S 
+    taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
+
+    # UNPACK TASKID CURSOR OBJECT
+    taskid_list = []
+    for r in taskid_list_data:
+        try:
+            taskid_list.append(r['taskid'])
+        except:
+            app.logger.info('taskid key value not found in mongoDB')
+
+
+    for item in taskid_list:
+        taskid_dict[item] = script_runner.AsyncResult(item).state
+        app.logger.info('for {} state is {} '.format(item, script_runner.AsyncResult(item).state))
+        
+
+
+
+    return render_template('upgrade_jobs_AsyncResult.html', taskid_dict=taskid_dict)
 
 
 @app.route('/job_file_builder', methods=['GET', 'POST'])
@@ -947,32 +907,9 @@ def diff_config_checker(runDate, queryKey, singleId):
 @app.route('/process/')
 def process():
 
-
-    # yaml_file = dynamic_yaml(hostname='R6', mgmt_ip='1.83.57.88', rtr_username='root', rtr_password='root')
-    # logger.info('yaml file is {}'.format(yaml_file))
-    
-    # load yaml file
-    # testbed = loader.load(yaml_file)
-    # rtr = testbed.devices['R6']
-    
-
-   
-    # install_active = rtr.mgmt1.configure('interface tenGigE 0/0/0/0/0 shutdown')
-    
-    # rtr.mgmt2.disconnect()
-
-    # logger.info('### Task complete !!!  ###')
-
-    
-    result = script_runner.delay()
-    # script_runner()
-    # job_taskid = AsyncResult(result.task_id)
-
-    # app.logger.info('job_taskid type is {} and the type is {}'.format(job_taskid, type(str(job_taskid))))
-
-    # mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'telnet_scrpt_run'})
-    
-   
+    result = math.delay(10, 20)
+    job_taskid = AsyncResult(result.task_id)
+    mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'somename'})
 
     return 'async resquest sent'
 
@@ -980,10 +917,31 @@ def process():
 def job_status():
 
 
-    # get all task id's 
+    # # get all task id's 
+    # taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
+
+    # # unpack taskid cursor object
+    # taskid_list = []
+    # for r in taskid_list_data:
+    #     try:
+    #         taskid_list.append(r['taskid'])
+    #     except:
+    #         app.logger.info('taskid key value not found in mongoDB')
+
+    # # print task id
+    # for item in taskid_list:
+    #     app.logger.info('for task id {} the status is {}'.format(item, math.apply_async(task_id=item).state))
+
+        
+    # return 'Hi from job status'
+
+    taskid_dict = {}
+
+
+    # GET ALL TASK ID'S 
     taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
 
-    # unpack taskid cursor object
+    # UNPACK TASKID CURSOR OBJECT
     taskid_list = []
     for r in taskid_list_data:
         try:
@@ -991,16 +949,71 @@ def job_status():
         except:
             app.logger.info('taskid key value not found in mongoDB')
 
-    # print task id
-    for item in taskid_list:
-        app.logger.info('for task id {} the status is {}'.format(item, script_runner.apply_async(task_id=item).state))
 
-        
-    return 'Hi from job status'
+    for item in taskid_list:
+        taskid_dict[item] = math.AsyncResult(item).state
+        app.logger.info('for {} state is {} '.format(item, math.AsyncResult(item).state))
+
+
+    return render_template('upgrade_jobs_AsyncResult.html', taskid_dict=taskid_dict)
+
+
+@celery.task(name='app.math')
+def math(num1, num2):
+
+    time.sleep(120)
+    num = num1 + num2
 
 
 @celery.task(name='app.script_runner')
-def script_runner():
+def script_runner(rtr_hostname, rtr_mgmt_ip, rtr_username, 
+                  rtr_password, platform, image_repo, tftp_dir, tftp_server_ip):
+
+
+    unique_id = str(uuid.uuid4())
+
+    # CREATE UNIQUE YAML FILE
+    yamfilename = 'testbed-' + unique_id + '.yaml'
+    
+    yaml_file = '''
+testbed:
+    name: noname
+    servers:
+        tftp:
+            address: 223.255.254.245
+            custom:
+                rootdir: /auto/tftpboot/mastarke
+            server: sj20lab-tftp4
+devices:
+    {rtr_hostname}:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.100.100.100
+                port: 2016
+                protocol: telnet
+            vty_1:
+                protocol : telnet
+                ip : "{rtr_mgmt_ip}"
+            vty_2:
+                protocol : telnet
+                ip : "{rtr_mgmt_ip}"
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "{rtr_username}"
+        passwords:
+            tacacs: {rtr_password}
+            enable: {rtr_password}
+            line: {rtr_password}
+    '''.format(rtr_hostname=rtr_hostname, rtr_mgmt_ip=rtr_mgmt_ip, rtr_username=rtr_username, rtr_password=rtr_password,)
+    try:
+        with open("{}".format(yamfilename), "w") as fh:
+            fh.write(yaml_file)
+            fh.close()
+    except:
+        copy_error = True
+
 
     jobfile = '''
 from ats.easypy import run
@@ -1009,12 +1022,13 @@ import os
 class ScriptArgs(object):
     """script related arguments"""
     # MATTHEW CELERY JOB FILE
-    testbed_file = ('/ws/mastarke-sjc/my_local_git/merit/my_yaml.yaml')
-    rtr = 'R6'
-    base_image_repo = '/auto/prod_weekly_archive1/bin/'
-    user_tftp_dir = '/auto/tftp-merit/mastarke/'
-    tftp_ip = '223.255.254.245'
-    load_image = '6.3.2'
+
+    testbed_file = ('{yamfilename}')
+    rtr = '{rtr_hostname}'
+    image_repo = '{image_repo}'
+    user_tftp_dir = '{tftp_dir}'
+    tftp_ip = '{tftp_server_ip}'
+    platform = '{platform}'
 
     ### DATABASE ARGS ###
     db_host = 'mastarke-lnx-v2'
@@ -1028,9 +1042,12 @@ class ScriptArgs(object):
 
 def main():
     run(testscript=('/ws/mastarke-sjc/my_local_git/image_picker_site/basic_telnet_script.py'))
-'''
+'''.format(yamfilename=yamfilename, rtr_hostname=rtr_hostname, platform=platform, 
+           image_repo=image_repo, tftp_dir=tftp_dir, tftp_server_ip=tftp_server_ip)
+
+
     # CREATE UNIQUIE JOBFILE NAME
-    jobfilename = 'jobfile-' + str(uuid.uuid4()) + '.py'
+    jobfilename = 'jobfile-' + unique_id + '.py'
 
 
     with open(jobfilename, mode='w', encoding='utf-8') as a_file:
@@ -1041,38 +1058,11 @@ def main():
     logger.info('###  !!!  Matthew in script_runner celery has now completed  !!!  ###')
 
     logger.info('###  Matthew in script_runner removing jobfile {}  ###'.format(jobfilename))
-    os.system('rm {}'.format(jobfilename))
+    os.system('rm {} {}'.format(jobfilename, yamfilename))
 
 
-
-
-
-
-# @celery.task()
-# def new():
-
-#     time.sleep(20)
-#     num = 5 + 5
-
-
-
-# @celery.task(serializer='json', name='app.script_runner')
-# def script_runner():
-
-
-    
-#     # pass arguments to yaml file 
-#     yaml_file = dynamic_yaml(hostname='R6', mgmt_ip='1.83.57.88', rtr_username='root', rtr_password='root')
-#     # load yaml file
-#     testbed = loader.load(yaml_file)
-#     rtr = testbed.devices['R6']
-#     rtr.connect(via ='vty_1', alias = 'mgmt1')
-#     install_active = rtr.mgmt1.configure('interface tenGigE 0/0/0/0/0 shutdown')
-#     rtr.mgmt1.disconnect()
-
-    
 
 
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
-    app.run(debug=True, port=1111, host='mastarke-lnx-v2')
+    app.run(debug=True, port=1112, host='mastarke-lnx-v2')

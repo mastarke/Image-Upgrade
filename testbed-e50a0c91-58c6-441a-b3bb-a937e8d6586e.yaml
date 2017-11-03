@@ -1,0 +1,32 @@
+
+testbed:
+    name: noname
+    servers:
+        tftp:
+            address: 223.255.254.245
+            custom:
+                rootdir: /auto/tftpboot/mastarke
+            server: sj20lab-tftp4
+devices:
+    R3:
+        type: 'asr9k-x64'
+        connections:
+            a:
+                ip: 172.100.100.100
+                port: 2016
+                protocol: telnet
+            vty_1:
+                protocol : telnet
+                ip : "1.83.57.82"
+            vty_2:
+                protocol : telnet
+                ip : "1.83.57.82"
+        tacacs:
+            login_prompt: "Username:"
+            password_prompt: "Password:"
+            username: "root"
+        passwords:
+            tacacs: root
+            enable: root
+            line: root
+    
