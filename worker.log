@@ -1734,3 +1734,9 @@ You must only enable the serializers that you will actually use.
 [2017-11-02 19:10:42,261: INFO/Worker-1] app.script_runner[b4808d22-ce2a-4fe4-988a-b463be312b59]: ###  Matthew in script_runner celery task  ###
 [2017-11-02 19:13:48,133: INFO/MainProcess] Received task: app.script_runner[e8e42071-a533-415e-89ed-7294b524602e]
 [2017-11-02 19:13:48,145: INFO/Worker-3] app.script_runner[e8e42071-a533-415e-89ed-7294b524602e]: ###  Matthew in script_runner celery task  ###
+[2017-11-02 19:50:45,676: INFO/Worker-3] app.script_runner[e8e42071-a533-415e-89ed-7294b524602e]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-02 19:50:45,676: INFO/Worker-3] app.script_runner[e8e42071-a533-415e-89ed-7294b524602e]: ###  Matthew in script_runner removing jobfile jobfile-e50a0c91-58c6-441a-b3bb-a937e8d6586e.py  ###
+[2017-11-02 19:50:45,718: INFO/MainProcess] Task app.script_runner[e8e42071-a533-415e-89ed-7294b524602e] succeeded in 2217.583289222792s: None
+[2017-11-02 20:03:52,393: INFO/Worker-1] app.script_runner[b4808d22-ce2a-4fe4-988a-b463be312b59]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-02 20:03:52,394: INFO/Worker-1] app.script_runner[b4808d22-ce2a-4fe4-988a-b463be312b59]: ###  Matthew in script_runner removing jobfile jobfile-adb97ff3-7b8b-43b7-9a2e-aaa41461a5c7.py  ###
+[2017-11-02 20:03:52,420: INFO/MainProcess] Task app.script_runner[b4808d22-ce2a-4fe4-988a-b463be312b59] succeeded in 3190.1704712640494s: None
