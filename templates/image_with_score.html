@@ -4,7 +4,7 @@
 
 {%block body%}
 <div class="jumbotron text-center">
-    <h1>Upgrade router no score</h1>
+    <h1>Upgrade router with score</h1>
 </div>
 
 <form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
@@ -88,9 +88,50 @@
           <br>
         </div>
     </div>
-    
 
-  <button class="btn btn-info" type="submit">Next</button>
+    <div class="row">
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">IXIA Chassis IP:</label>
+          <input type="text" class="form-control" id="validationCustom06" placeholder="Ixia Chassis IP" name="ixia_chassis_ip" required>
+          <div class="invalid-feedback">
+            Please provide a valid IXIA Chassis IP.
+          </div>
+          <br>
+        </div>
+
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">DB Collection name:</label>
+          <input type="text" class="form-control" id="validationCustom07" placeholder="db collection name" name="db_collection" required>
+          <div class="invalid-feedback">
+            Please provide a valid DB collection name.
+          </div>
+          <br>
+        </div>
+    </div>
+
+        <div class="row">
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">PSAT/NEST Job file location:</label>
+          <input type="text" class="form-control" id="validationCustom08" placeholder="job file path" name="psat_job_file" required>
+          <div class="invalid-feedback">
+            Please provide a path to your job file.
+          </div>
+          <br>
+        </div>
+
+        <div class="col-md-5 mb-3">
+          <label for="validationCustom05">Unzip PSAT/NEST folder:</label>
+          <input type="text" class="form-control" id="validationCustom09" placeholder="unzip folder location" name="psat_unzip_output_folder" required>
+          <div class="invalid-feedback">
+            Please provide a valid location to unzip psat/nest results.
+          </div>
+          <br>
+        </div>
+    </div>
+
+    <button class="btn btn-info" type="submit">Next</button>
+
+
 </form>
 
 

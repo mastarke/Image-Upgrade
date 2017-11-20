@@ -1,0 +1,74 @@
+[2017-11-19 16:47:55,262: ERROR/ForkPoolWorker-1] Task app.script_runner[fe0ab1b6-1577-4253-b7dc-36b964e0f560] raised unexpected: KeyError('get_score',)
+Traceback (most recent call last):
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 374, in trace_task
+    R = retval = fun(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/Flask_celery.py", line 12, in __call__
+    return TaskBase.__call__(self, *args, **kwargs)
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 629, in __protected_call__
+    return self.run(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/app.py", line 1087, in script_runner
+    psat_job_file=psat_job_file, ixia_chassis_ip=ixia_chassis_ip)
+KeyError: 'get_score'
+[2017-11-19 16:55:39,838: ERROR/ForkPoolWorker-1] Task app.script_runner[d1fb5b9d-ec24-49b6-896b-0d2774eb735d] raised unexpected: AttributeError("'module' object has no attribute 'info'",)
+Traceback (most recent call last):
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 374, in trace_task
+    R = retval = fun(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/Flask_celery.py", line 12, in __call__
+    return TaskBase.__call__(self, *args, **kwargs)
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 629, in __protected_call__
+    return self.run(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/app.py", line 1006, in script_runner
+    logging.info('Matthew your in script runner')
+AttributeError: 'module' object has no attribute 'info'
+[2017-11-19 17:00:36,773: ERROR/ForkPoolWorker-1] Task app.script_runner[3bb076dd-cc74-43a6-94c5-ea42fe49cda2] raised unexpected: AttributeError("'module' object has no attribute 'info'",)
+Traceback (most recent call last):
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 374, in trace_task
+    R = retval = fun(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/Flask_celery.py", line 12, in __call__
+    return TaskBase.__call__(self, *args, **kwargs)
+  File "/ws/mastarke-sjc/pyats2/lib/python3.4/site-packages/celery/app/trace.py", line 629, in __protected_call__
+    return self.run(*args, **kwargs)
+  File "/ws/mastarke-sjc/my_local_git/image_picker_site/app.py", line 1006, in script_runner
+    logging.info('Matthew your in script runner')
+AttributeError: 'module' object has no attribute 'info'
+[2017-11-19 17:02:42,489: INFO/ForkPoolWorker-1] app.script_runner[14a17033-2711-4c00-b982-06a02bedd87d]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:02:42,490: INFO/ForkPoolWorker-1] app.script_runner[14a17033-2711-4c00-b982-06a02bedd87d]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:02:42,491: INFO/ForkPoolWorker-1] app.script_runner[14a17033-2711-4c00-b982-06a02bedd87d]: ###  Matthew in script_runner removing jobfile jobfile-acdca170-8de1-4ce9-a873-de6735c8c5d5.py  ###
+[2017-11-19 17:02:42,502: INFO/ForkPoolWorker-1] Task app.script_runner[14a17033-2711-4c00-b982-06a02bedd87d] succeeded in 0.02302337810397148s: None
+[2017-11-19 17:07:01,048: INFO/ForkPoolWorker-1] app.script_runner[443b5a9d-024f-4b9b-8ed5-90431d189605]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:07:01,049: INFO/ForkPoolWorker-1] app.script_runner[443b5a9d-024f-4b9b-8ed5-90431d189605]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:07:01,051: INFO/ForkPoolWorker-1] app.script_runner[443b5a9d-024f-4b9b-8ed5-90431d189605]: ###  Matthew in script_runner removing jobfile jobfile-e847b5aa-e1b1-4c81-b936-15391f06bd8b.py  ###
+[2017-11-19 17:07:01,053: INFO/ForkPoolWorker-1] Task app.script_runner[443b5a9d-024f-4b9b-8ed5-90431d189605] succeeded in 0.01311747170984745s: None
+[2017-11-19 17:10:28,049: INFO/ForkPoolWorker-1] app.script_runner[fd41ec4c-f8a6-4761-b32c-74edbd133633]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:10:28,050: INFO/ForkPoolWorker-1] app.script_runner[fd41ec4c-f8a6-4761-b32c-74edbd133633]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:10:28,051: INFO/ForkPoolWorker-1] app.script_runner[fd41ec4c-f8a6-4761-b32c-74edbd133633]: ###  Matthew in script_runner removing jobfile jobfile-8a5d3af8-49ad-4b6f-ac8d-e4f12d70366d.py  ###
+[2017-11-19 17:10:28,053: INFO/ForkPoolWorker-1] Task app.script_runner[fd41ec4c-f8a6-4761-b32c-74edbd133633] succeeded in 0.011654814705252647s: None
+[2017-11-19 17:12:01,792: INFO/ForkPoolWorker-1] app.script_runner[6452823a-c95c-4cd1-b43c-75c884979e19]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:12:01,794: INFO/ForkPoolWorker-1] app.script_runner[6452823a-c95c-4cd1-b43c-75c884979e19]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:12:01,796: INFO/ForkPoolWorker-1] app.script_runner[6452823a-c95c-4cd1-b43c-75c884979e19]: ###  Matthew in script_runner removing jobfile jobfile-ce6805b8-620f-4cfb-ac87-a5451f40a71d.py  ###
+[2017-11-19 17:12:01,800: INFO/ForkPoolWorker-1] Task app.script_runner[6452823a-c95c-4cd1-b43c-75c884979e19] succeeded in 0.03046359308063984s: None
+[2017-11-19 17:21:03,679: INFO/ForkPoolWorker-1] app.script_runner[3cb087eb-3e84-4e4c-b928-7172b30e42bc]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:21:03,680: INFO/ForkPoolWorker-1] app.script_runner[3cb087eb-3e84-4e4c-b928-7172b30e42bc]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:21:03,681: INFO/ForkPoolWorker-1] app.script_runner[3cb087eb-3e84-4e4c-b928-7172b30e42bc]: ###  Matthew in script_runner removing jobfile jobfile-75a7b554-a610-4c3e-9537-8fc749199991.py  ###
+[2017-11-19 17:21:03,686: INFO/ForkPoolWorker-1] Task app.script_runner[3cb087eb-3e84-4e4c-b928-7172b30e42bc] succeeded in 0.016295164823532104s: None
+[2017-11-19 17:24:20,248: INFO/ForkPoolWorker-1] app.script_runner[ebe1a94f-c371-4789-b77f-c65d14168189]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 17:24:20,249: INFO/ForkPoolWorker-1] app.script_runner[ebe1a94f-c371-4789-b77f-c65d14168189]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 17:24:20,250: INFO/ForkPoolWorker-1] app.script_runner[ebe1a94f-c371-4789-b77f-c65d14168189]: ###  Matthew in script_runner removing jobfile jobfile-cc0034d1-68ac-49b0-9a34-681d6d132f19.py  ###
+[2017-11-19 17:24:20,253: INFO/ForkPoolWorker-1] Task app.script_runner[ebe1a94f-c371-4789-b77f-c65d14168189] succeeded in 0.0156258512288332s: None
+[2017-11-19 18:29:28,717: INFO/ForkPoolWorker-1] app.script_runner[c002a1c2-82f2-428d-b590-900eef877ad0]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 18:37:19,961: INFO/ForkPoolWorker-1] app.script_runner[c002a1c2-82f2-428d-b590-900eef877ad0]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 18:37:19,963: INFO/ForkPoolWorker-1] app.script_runner[c002a1c2-82f2-428d-b590-900eef877ad0]: ###  Matthew in script_runner removing jobfile jobfile-fadb53e4-5df9-43b7-bd27-6d70779e315e.py  ###
+[2017-11-19 18:37:19,984: INFO/ForkPoolWorker-1] Task app.script_runner[c002a1c2-82f2-428d-b590-900eef877ad0] succeeded in 471.28114430233836s: None
+[2017-11-19 18:43:48,973: INFO/ForkPoolWorker-1] app.script_runner[77cbd84a-4be6-4f8d-861d-a73c5a93d1b9]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 18:51:46,062: INFO/ForkPoolWorker-1] app.script_runner[77cbd84a-4be6-4f8d-861d-a73c5a93d1b9]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 18:51:46,065: INFO/ForkPoolWorker-1] app.script_runner[77cbd84a-4be6-4f8d-861d-a73c5a93d1b9]: ###  Matthew in script_runner removing jobfile jobfile-7c180107-a48f-41d0-97fc-781d02856cd6.py  ###
+[2017-11-19 18:51:46,086: INFO/ForkPoolWorker-1] Task app.script_runner[77cbd84a-4be6-4f8d-861d-a73c5a93d1b9] succeeded in 477.1216522268951s: None
+[2017-11-19 18:59:31,642: INFO/ForkPoolWorker-1] app.script_runner[5c1384b8-d66c-469e-af0e-f7c21b1f7268]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 20:32:19,208: INFO/ForkPoolWorker-1] app.script_runner[5c1384b8-d66c-469e-af0e-f7c21b1f7268]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 20:32:19,210: INFO/ForkPoolWorker-1] app.script_runner[5c1384b8-d66c-469e-af0e-f7c21b1f7268]: ###  Matthew in script_runner removing jobfile jobfile-3eb8f0dd-82b0-4b65-bbaa-01ebcd8f8b90.py  ###
+[2017-11-19 20:32:19,220: INFO/ForkPoolWorker-1] Task app.script_runner[5c1384b8-d66c-469e-af0e-f7c21b1f7268] succeeded in 5567.627931561321s: None
+[2017-11-19 20:43:44,302: INFO/ForkPoolWorker-1] app.script_runner[b2eefa7c-7366-40c3-8e10-a91c19eb9264]: ###  Matthew in script_runner celery task  ###
+[2017-11-19 22:03:14,865: INFO/ForkPoolWorker-1] app.script_runner[b2eefa7c-7366-40c3-8e10-a91c19eb9264]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-19 22:03:14,866: INFO/ForkPoolWorker-1] app.script_runner[b2eefa7c-7366-40c3-8e10-a91c19eb9264]: ###  Matthew in script_runner removing jobfile jobfile-004814d7-3b88-47cb-922c-d3a7802d23e6.py  ###
+[2017-11-19 22:03:14,892: INFO/ForkPoolWorker-1] Task app.script_runner[b2eefa7c-7366-40c3-8e10-a91c19eb9264] succeeded in 4770.598763069138s: None
+[2017-11-20 07:53:24,377: INFO/ForkPoolWorker-1] app.script_runner[8d4ac698-7be8-4e89-a908-f7905caf3d22]: ###  Matthew in script_runner celery task  ###

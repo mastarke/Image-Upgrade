@@ -13,7 +13,12 @@ from IPython import embed
 import sys
 import pdb
 from ats.topology import loader
+from pymongo import MongoClient
 
+# IMPORT FILES FROM ANOTHER FOLDER
+sys.path.insert(0, '/ws/mastarke-sjc/my_local_git/image_picker_site/api_files')
+import meritAPI 
+from IxNetRest import *
 
 
 log = logging.getLogger(__name__)
@@ -98,7 +103,7 @@ def remove_inactive_pies(rtr, os_type):
     try:
         if os_type == 'cXR':
             output = rtr.mgmt1.execute('admin install remove inactive '
-                                       'synchronous prompt-level none')
+                                       'asynchronous prompt-level none')
         else:
             output = rtr.mgmt1.execute('install remove inactive all')
     except:
@@ -108,7 +113,7 @@ def remove_inactive_pies(rtr, os_type):
     
 
     install_log_num = re.search(r'Install operation (\d+)', output)
-    for i in range(4):
+    for i in range(10):
         output = rtr.mgmt1.execute('show install log {} detail'.format(install_log_num.group(1)))
         # MATCH OS TYPE EXR AND CXR ASR9K
         if re.search(r'Install operation \d+ completed successfully', output):
@@ -231,14 +236,36 @@ def poll_lc_is_up(linecard, os_type, rtr, result=0):
 
     return result
 
+def running_config_checker(original_cfg, new_cfg):
+
+    '''Used to compare configs before and after image upgrade'''
+
+    import difflib
+    original_cfg=original_cfg.splitlines(1)
+    new_cfg=new_cfg.splitlines(1)
+
+    diff=difflib.unified_diff(original_cfg, new_cfg)
+
+    return ''.join(diff)
+
 class Common_setup(aetest.CommonSetup):
     """Common Setup section."""
+
+
 
 
     # IMPORT THE JOBFILE INTO NAMESPACE
     jobfile = runtime.job.name  # GET JOB FILE NAME
     a = importlib.import_module(jobfile)  # IMPORT THE JOB FILE INTO NAMESPACE
     ScriptArgs = a.ScriptArgs()  # INSTANCE OF SRSCRIPTARGS
+
+    
+    # OPTINAL ARGS FROM JOB FILE
+    try:
+        get_score = ScriptArgs.get_score
+    except:
+        get_score = None
+        print('Setting get_score to {}'.format(get_score))
 
 
     # IMPORT YAML FILE ATTRIBUTES
@@ -268,7 +295,8 @@ class Common_setup(aetest.CommonSetup):
 
     # CHECK PLATFORM TYPE 
     platform = rtr.mgmt1.adminexec('show inventory chassis')
-    m = re.search(r'Descr: +(NCS\d+|ASR-\d+|"ASR \d+)', platform, re.IGNORECASE)
+    m = re.search(r'Descr: +(NCS\d+|ASR-\d+|"ASR \d+|ASR +\d+)', platform, re.IGNORECASE)
+    log.info('Matthew m.group is {}'.format(m.group(0)))
     platform = m.group(0)
     
     if 'NCS' in platform or 'ncs' in platform:
@@ -291,6 +319,49 @@ class Common_setup(aetest.CommonSetup):
     if lc_result != 0:
         self.failed('LC did not return to up state.')
 
+    if get_score == True:
+
+        # DATABASE ARGUMENTS
+        db_host = ScriptArgs.db_host
+        db_name = ScriptArgs.db_name
+        db_collection = ScriptArgs.db_collection
+
+        log.info('ATTEMPTING TO CONNECT TO IXIA VIA REST API')
+        ixia = IxNetRestMain(ScriptArgs.ixia_chassis_ip, '11009')
+        sessionId = ixia.sessionId
+        log.info('sessionId = {}'.format(sessionId))
+        
+        # CHECK IF IXIA CONNECTED
+        try:
+            if re.match('http:\/\/\d+.\d+.\d+.\d+:11009', sessionId):
+                log.info('IXIA REST API connected via {}'.format(sessionId))
+        except:
+            log.info('Ixia not connected')
+
+        log.info('STARTING IXIA TRAFFIC...PLEASE WAIT')
+        ixia.startTraffic()
+        time.sleep(180)
+
+        # CALLING RTR LOGGING FUNCTION
+        os_type, chassis, cur_image, db_insert_data_dict = \
+            meritAPI.Report.rtr_log(rtr, traffic_state='pre_traffic')
+
+        # SETTING RELEASE VERSION
+        release = cur_image.group(1)
+
+        # CALLING PRE TRAFFIC CHECK METHOD
+        pre_traffic_stream_data = \
+            meritAPI.Traffic_data.traffic_check(ixia, traffic_state='pre_traffic')
+        
+        
+        # SEND DATA TO LOG
+        update_data_dict = meritAPI.Report.traffic_log(traffic_state='pre_traffic', 
+                                                       traffic_dict=pre_traffic_stream_data)
+
+        pre_upgrade_config = rtr.mgmt1.execute('show run')
+
+        db_insert_data_dict.update(update_data_dict)
+
     # REMOVING INACTIVE PIES
     remove_inactive_pies(rtr, os_type)
 
@@ -307,6 +378,8 @@ class ImageUpgrade(aetest.Testcase):
     @aetest.test
     def test(self):
         cs = Common_setup()
+
+
 
         # GETTING ACTIVE IMAGE ON TESTBED
         current_image = cs.rtr.mgmt1.execute('show install active summary | ex CSC')
@@ -391,10 +464,11 @@ class ImageUpgrade(aetest.Testcase):
         os.popen('chmod 777 {}*k9sec*'.format(cs.ScriptArgs.user_tftp_dir)).read()
         # USE VARIABLE THAT WAS CHECKED FOR DUPLICATES.
         all_images = ' '.join(all_images_list)
-      
+
+        
         if cs.os_type == 'cXR':
             cmd = ('admin install add source tftp://{}{} {} '
-                   'synchronous activate prompt-level none'
+                   'asynchronous activate prompt-level none'
                    .format(cs.tftp_ip, cs.user_tftp_dir, all_images))
         else:
             cmd = ('install add source tftp://{}{} {} '
@@ -602,33 +676,128 @@ class ImageUpgrade(aetest.Testcase):
             # REMOVE INACTIVE IMAGES
             remove_inactive_pies(cs.rtr, cs.os_type)
 
-            # TAKING CURRENT TIME - STARTING TIME
-            elapsed_time=time.time()-start_time
-            total_upgrade_time = int(elapsed_time/60)
+            if cs.get_score == True:
 
-            # GETTING ACTIVE IMAGE ON TESTBED
-            current_image = cs.rtr.mgmt1.execute('show install active summary | ex CSC')
-            # GETTING RELEASE NUMBER EXAMPLE : 6.2.1.34I
-            cur_image = re.search(r'(\d+\.\d+\.\d+).(\d+)(\w+)', current_image)
+                # TAKING CURRENT TIME - STARTING TIME
+                elapsed_time=time.time()-start_time
+                total_upgrade_time = int(elapsed_time/60)
 
-            # GET PIES THAT WERE LOADED ON TESTBED
-            upgrade_pies = re.findall(r'\w+-(\w+)-', all_images)
+                # GETTING ACTIVE IMAGE ON TESTBED
+                current_image = cs.rtr.mgmt1.execute('show install active summary | ex CSC')
+                # GETTING RELEASE NUMBER EXAMPLE : 6.2.1.34I
+                cur_image = re.search(r'(\d+\.\d+\.\d+).(\d+)(\w+)', current_image)
 
-            # GET TOTAL SIZE OF PIES INSTALLED
-            image_size = get_total_image_size(cs.user_tftp_dir,all_images)
+                # GET PIES THAT WERE LOADED ON TESTBED
+                upgrade_pies = re.findall(r'\w+-(\w+)-', all_images)
 
-            meritData = {}
-            meritData['post_upgrade_image'] = cur_image.group(0)
-            meritData['upgrade_time'] = total_upgrade_time
-            meritData['upgrade_pies'] = upgrade_pies
-            meritData['image_size'] = image_size
+                # GET TOTAL SIZE OF PIES INSTALLED
+                image_size = get_total_image_size(cs.user_tftp_dir,all_images)
 
-            # cs.db_insert_data_dict.update(meritData)
+                meritData = {}
+                meritData['post_upgrade_image'] = cur_image.group(0)
+                meritData['upgrade_time'] = total_upgrade_time
+                meritData['upgrade_pies'] = upgrade_pies
+                meritData['image_size'] = image_size
+
+                cs.db_insert_data_dict.update(meritData)
+                
+                log.info('allowing some time for protocols to converge '
+                         'before checking ixia traffic stream data')
+                time.sleep(120) 
+
+                log.info(banner('Starting Post Traffic Check'))
+                
+                # CALLING RTR LOGGING FUNCTION
+                cur_image, post_upgrade_data_dict = \
+                    meritAPI.Report.rtr_log(cs.rtr, traffic_state='post_traffic')
+
+                # SETTING RELEASE VERSION
+                release = cur_image.group(1)
+
+                # CALLING PRE TRAFFIC CHECK METHOD
+                post_traffic_stream_data = \
+                    meritAPI.Traffic_data.traffic_check(cs.ixia, traffic_state='post_traffic')
+                    
+                # SEND DATA TO LOG
+                update_data_dict = \
+                    meritAPI.Report.traffic_log(traffic_state='post_traffic', 
+                                                traffic_dict=post_traffic_stream_data)
+
+                traffic_score = meritAPI.Report.traffic_score(release, 
+                                                              cs.pre_traffic_stream_data, 
+                                                              post_traffic_stream_data)
+
+                # GETTING CONFIG AFTER IMAGE UPGRADE AND CHECKING DIFF
+                post_upgrade_config = cs.rtr.mgmt1.execute('show run')
+                diff_config_output = running_config_checker(cs.pre_upgrade_config, post_upgrade_config)
+                diff_config_dict = {}
+                diff_config_dict['Config Comparison Diff'] = diff_config_output
+
+                cs.db_insert_data_dict.update(diff_config_dict)
+                cs.db_insert_data_dict.update(post_upgrade_data_dict)
+                cs.db_insert_data_dict.update(update_data_dict)
+                cs.db_insert_data_dict.update(traffic_score)
+
+                log.info('Stopping ixia PSAT will restart')
+                cs.ixia.stopTraffic()
+                time.sleep(180)
+
+                log.info(banner('Starting PSAT portion of sript'))
             
-            log.info('allowing some time for protocols to converge '
-                     'before checking ixia traffic stream data')
-            time.sleep(120) 
+                # CHECKING PSAT DIRCTORY IF EXISTING PSAT REPORT FILE EXIST
+                psat_files_exist = os.popen('ls {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)).read()
 
+                log.info('PSAT Folder {}/ has the following content \n\n{}'.format(cs.ScriptArgs.psat_unzip_output_folder, 
+                                                                                   psat_files_exist))
+
+                # CLEANING PSAT DIECTORY
+                try:
+                    log.info('Cleaning folder {}/ before running psat'.format(cs.ScriptArgs.psat_unzip_output_folder))
+                    os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
+                except:
+                    log.info('No file found')
+
+                log.info(banner('Starting PSAT'))
+                psat_cmd = 'autoeasy {} -archive_dir {}/'.format(cs.ScriptArgs.psat_job_file, 
+                                                                cs.ScriptArgs.psat_unzip_output_folder)
+
+                log.info('running cmd {}'.format(psat_cmd))
+                os.system(psat_cmd)
+
+                log.info(banner('Unzipping psat file'))
+                os.system('unzip {}/* -d {}/'.format(cs.ScriptArgs.psat_unzip_output_folder, 
+                                                   cs.ScriptArgs.psat_unzip_output_folder))
+
+                log.info(banner('calling score function'))
+                # CALLING MERIT PSAT SCORE CALU FUNCTION
+                psat_data_dict = \
+                    meritAPI.Psat_logging.psat_results_to_db(cs.db_insert_data_dict['merit_traffic_score'],
+                                                             cs.ScriptArgs.psat_unzip_output_folder)
+
+                # APPEND TO DICT
+                cs.db_insert_data_dict.update(psat_data_dict)
+
+                log.info(banner('Clearing PSAT Folder {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)))
+                try:
+                    os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
+                except:
+                    log.info('No file found')
+
+
+                # CONNECT TO DB
+                db = MongoClient(cs.db_host)
+                # CREATE DB CALLED meritDB
+                dbName = db[cs.db_name]
+                # CREATE A COLLECTION CALLED meritData
+                collection_name = dbName[cs.db_collection]
+
+                # PUSH DATA INTO DATABASE
+                db_id = collection_name.insert_one(cs.db_insert_data_dict).inserted_id
+
+                log.info('db entry is {}'.format(db_id))
+
+                db.close()
+                
 
     @aetest.cleanup
     def cleanup(self):

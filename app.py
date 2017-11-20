@@ -23,7 +23,9 @@ import time
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 import uuid
-from unicon import Unicon
+import datetime
+import itertools
+
 
 
 app = Flask(__name__)
@@ -303,11 +305,12 @@ def install_active(ip_addr, username, password, result=0):
     output = child.before
     # CONVERT TYPE BYTES TO STRING TYPE
     str_output = output.decode('utf-8')
-    # CHECK IF PAM RESTART SCRIPT IS FOUND
+    
     for line in str_output.split('\n'):
         print(line)
 
     child.close()
+    
     return str_output
         
 # INDEX
@@ -323,10 +326,29 @@ def about():
 
     return render_template('about.html')
 
+# UPGRADE WITH SCORE
+@app.route('/image_with_score', methods=['GET', 'POST'])
+def image_with_score():
 
-# Image
+    session['get_score'] = True
+
+    command = ('ls /auto/prod_weekly_archive1/bin/  '
+               '/auto/prod_weekly_archive2/bin/  '
+               '/auto/prod_weekly_archive3/bin/')
+
+    command_output = os.popen(command).read()
+
+    matchObj = re.findall(r'\d+.\d+.\d+.\d+I.*', command_output)
+    cur_releases = list(set(matchObj))
+
+    return render_template('image_with_score.html', cur_releases=cur_releases)
+
+
+# IMAGE
 @app.route('/image', methods=['GET', 'POST'])
 def image():
+
+    session['get_score'] = False
 
     command = ('ls /auto/prod_weekly_archive1/bin/  '
                '/auto/prod_weekly_archive2/bin/  '
@@ -343,6 +365,10 @@ def image():
 @app.route('/packages', methods=['GET', 'POST'])
 def packages():
 
+    get_score = session.get('get_score', None)
+
+    app.logger.info('Matthew get_score is {}'.format(get_score))
+
     if request.method == 'POST':
         image = request.form['image']
         platform = request.form['platform']
@@ -353,7 +379,6 @@ def packages():
         rtr_username = request.form['rtr_username']
         rtr_password = request.form['rtr_password']
     
-
         session['platform'] = platform
         session['tftp_dir'] = tftp_dir
         session['tftp_server_ip'] = tftp_server_ip
@@ -362,13 +387,10 @@ def packages():
         session['rtr_username'] = rtr_username
         session['rtr_password'] = rtr_password
 
-        
-
         # ATTEMPT TO PING DEVICE 
         ping_output = os.popen('ping {} -c 5'.format(rtr_mgmt_ip)).read()
         ping_success_num = re.search(r'\d+ packets transmitted, +\d+ received, +(\d+)% packet loss', ping_output)
         if int(ping_success_num.group(1)) <= 21:
-            app.logger.info('Matthew ping result is less than 20 so telnet to router')
             ping_result = True
         else:
             app.logger.info('Matthew ping result was not good it was {}'.format(ping_success_num.group(1)))
@@ -376,38 +398,46 @@ def packages():
 
         session['ping_result'] = ping_result
 
+        app.logger.info('Matthew ping result is {}'.format(ping_result))
+
         if ping_result == True:
             install_output = install_active(rtr_mgmt_ip, rtr_username, rtr_password)
-            # # pass arguments to yaml file 
-            # yaml_file = dynamic_yaml(rtr_hostname, rtr_mgmt_ip, rtr_username, rtr_password)
-            # # load yaml file
-            # testbed = loader.load(yaml_file)
-            # rtr = testbed.devices[rtr_hostname]
-            # rtr.connect(via ='vty_1', alias = 'mgmt1')
-            # install_active = rtr.mgmt1.execute('show install active summary')
-            # rtr.mgmt1.disconnect()
-
         
-        
-    command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
-                 '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
-                 '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))
-    
-    command_output = os.popen(command).read()
+            command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
+                         '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
+                         '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))
+            
+            command_output = os.popen(command).read()
 
-    dir_found = re.search(r'\/\w+\/\w+\/\w+\/.*', command_output)
-    path = re.sub(r':', '', dir_found.group(0))
-    image_repo = path
-    
+            dir_found = re.search(r'\/\w+\/\w+\/\w+\/.*', command_output)
+            path = re.sub(r':', '', dir_found.group(0))
+            image_repo = path
+            
+            session['image_repo'] = image_repo
 
-    session['image_repo'] = image_repo
+            packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
+            pies = re.findall(r'\w+.*', packages)
 
+            if request.method == 'POST' and get_score == True:
+                app.logger.info('upgrade with score')
+                ixia_chassis_ip = request.form['ixia_chassis_ip']
+                db_collection = request.form['db_collection']
+                psat_job_file = request.form['psat_job_file']
+                psat_unzip_output_folder = request.form['psat_unzip_output_folder']
 
-    packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
-    pies = re.findall(r'\w+.*', packages)
-    
-    return render_template('packages.html', pies=pies, ping_result=ping_result, 
-                                            rtr_mgmt_ip=rtr_mgmt_ip, install_output=install_output)
+                session['ixia_chassis_ip'] = ixia_chassis_ip
+                session['db_collection'] = db_collection
+                session['psat_job_file'] = psat_job_file
+                session['psat_unzip_output_folder'] = psat_unzip_output_folder
+
+                app.logger.info('Matthew ixia_chassis_ip is {} db_collection is {} psat_job_file is {} psat_unzip_output_folder is {} '.format(ixia_chassis_ip, db_collection, psat_job_file, psat_unzip_output_folder))
+
+            
+            return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip, 
+                                                     install_output=install_output)
+
+        else:
+            return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip)
 
 
 @app.route('/copycmd', methods=['GET', 'POST'])
@@ -424,6 +454,8 @@ def copycmd():
 @app.route('/install_on_rtr', methods=['GET', 'POST'])
 def install_on_rtr():
 
+    get_score = session.get('get_score', None)
+
     rtr_mgmt_ip = session.get('rtr_mgmt_ip', None)
     ping_result = session.get('ping_result', None)
     rtr_username = session.get('rtr_username', None)
@@ -431,20 +463,28 @@ def install_on_rtr():
     rtr_hostname = session.get('rtr_hostname', None)
     platform = session.get('platform', None)
     image_repo = session.get('image_repo', None)
-
     tftp_dir = session.get('tftp_dir', None)
     tftp_server_ip = session.get('tftp_server_ip', None)
 
+
+    ixia_chassis_ip = session.get('ixia_chassis_ip', None)
+    db_collection = session.get('db_collection', None)
+    psat_job_file = session.get('psat_job_file', None)
+    psat_unzip_output_folder = session.get('psat_unzip_output_folder', None)
+    
 
     if request.method == 'POST':
         install_on_rtr = request.form['install_on_rtr']
         
         result = script_runner.delay(rtr_hostname, rtr_mgmt_ip, rtr_username, 
                                      rtr_password, platform, image_repo, tftp_dir, 
-                                     tftp_server_ip)
+                                     tftp_server_ip, db_collection, psat_unzip_output_folder,
+                                     psat_job_file, ixia_chassis_ip, get_score)
 
         job_taskid = AsyncResult(result.task_id)
-        mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'telnet_scrpt_run'})
+        mongo.db.job_task_id.insert({'taskid': str(job_taskid), 
+                                     'jobname':'Upgrade host ' + rtr_hostname + ' Mgmt ' + rtr_mgmt_ip + ' Chassis ' + platform, 
+                                     'date':datetime.datetime.now().strftime("%m-%d-%y %H:%M:%S")})
 
 
     return render_template('install_on_rtr.html', ping_result=0, job_taskid=str(job_taskid))
@@ -454,11 +494,11 @@ def install_on_rtr():
 @app.route('/upgrade_jobs_AsyncResult', methods=['GET', 'POST'])
 def upgrade_jobs_AsyncResult():
 
-    taskid_dict = {}
-
 
     # GET ALL TASK ID'S 
     taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
+    taskdate_list_data = mongo.db.job_task_id.find({}, {'date':1,'_id':0}).sort('date',pymongo.ASCENDING)
+    jobname_list_data = mongo.db.job_task_id.find({}, {'jobname':1,'_id':0}).sort('date',pymongo.ASCENDING)
 
     # UNPACK TASKID CURSOR OBJECT
     taskid_list = []
@@ -468,15 +508,37 @@ def upgrade_jobs_AsyncResult():
         except:
             app.logger.info('taskid key value not found in mongoDB')
 
+    app.logger.info('matthew taskid_list is {}'.format(taskid_list))
 
+    
+    # PASS TASK ID TO ASYNC RESULT TO GET TASK RESULT FOR THAT SPECIFIC TASK
+    task_state_list = []
     for item in taskid_list:
-        taskid_dict[item] = script_runner.AsyncResult(item).state
-        app.logger.info('for {} state is {} '.format(item, script_runner.AsyncResult(item).state))
+        try:
+            task_state_list.append(script_runner.AsyncResult(item).state)
+        except:
+            task_state_list.append('UNKNOWN')
         
+    # UNPACK DATE CURSOR OBJECT
+    date_list = []
+    for r in taskdate_list_data:
+        try:
+            date_list.append(r['date'])
+        except:
+            app.logger.info('date key value not found in mongoDB')
 
 
+    # UNPACK jobname CURSOR OBJECT
+    jobname_list = []
+    for r in jobname_list_data:
+        try:
+            jobname_list.append(r['jobname'])
+        except:
+            app.logger.info('date key value not found in mongoDB')
 
-    return render_template('upgrade_jobs_AsyncResult.html', taskid_dict=taskid_dict)
+    return render_template('upgrade_jobs_AsyncResult.html', data_list=zip(taskid_list, 
+                                                                          task_state_list, 
+                                                                          date_list, jobname_list))
 
 
 @app.route('/job_file_builder', methods=['GET', 'POST'])
@@ -908,6 +970,8 @@ def diff_config_checker(runDate, queryKey, singleId):
 def process():
 
     result = math.delay(10, 20)
+    math.delay(state='PROGRESS')
+
     job_taskid = AsyncResult(result.task_id)
     mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'somename'})
 
@@ -915,25 +979,6 @@ def process():
 
 @app.route('/job_status')
 def job_status():
-
-
-    # # get all task id's 
-    # taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
-
-    # # unpack taskid cursor object
-    # taskid_list = []
-    # for r in taskid_list_data:
-    #     try:
-    #         taskid_list.append(r['taskid'])
-    #     except:
-    #         app.logger.info('taskid key value not found in mongoDB')
-
-    # # print task id
-    # for item in taskid_list:
-    #     app.logger.info('for task id {} the status is {}'.format(item, math.apply_async(task_id=item).state))
-
-        
-    # return 'Hi from job status'
 
     taskid_dict = {}
 
@@ -958,17 +1003,11 @@ def job_status():
     return render_template('upgrade_jobs_AsyncResult.html', taskid_dict=taskid_dict)
 
 
-@celery.task(name='app.math')
-def math(num1, num2):
-
-    time.sleep(120)
-    num = num1 + num2
-
-
 @celery.task(name='app.script_runner')
 def script_runner(rtr_hostname, rtr_mgmt_ip, rtr_username, 
-                  rtr_password, platform, image_repo, tftp_dir, tftp_server_ip):
-
+                  rtr_password, platform, image_repo, tftp_dir, tftp_server_ip,
+                  db_collection='meritData', psat_unzip_output_folder=None, 
+                  psat_job_file=None, ixia_chassis_ip=None, get_score=None):
 
     unique_id = str(uuid.uuid4())
 
@@ -1021,7 +1060,9 @@ import os
 
 class ScriptArgs(object):
     """script related arguments"""
-    # MATTHEW CELERY JOB FILE
+    # CELERY JOB FILE
+
+    get_score = {get_score}
 
     testbed_file = ('{yamfilename}')
     rtr = '{rtr_hostname}'
@@ -1033,17 +1074,22 @@ class ScriptArgs(object):
     ### DATABASE ARGS ###
     db_host = 'mastarke-lnx-v2'
     db_name = 'meritDB'
-    db_collection = 'meritData'
+    db_collection = '{db_collection}'
 
     ### PSAT ARGS ###
-    psat_unzip_output_folder = '/auto/tftp-sjc-users2/mastarke/psat/r6'
-    psat_job_file = '/auto/nest/ats5.3.0/mastarke/jobs/R6-repeat-trigger-psat.job'
+    psat_unzip_output_folder = '{psat_unzip_output_folder}'
+    psat_job_file = '{psat_job_file}'
+
+    # IXIA_CHASSIS
+    ixia_chassis_ip = '{ixia_chassis_ip}'
 
 
 def main():
     run(testscript=('/ws/mastarke-sjc/my_local_git/image_picker_site/basic_telnet_script.py'))
 '''.format(yamfilename=yamfilename, rtr_hostname=rtr_hostname, platform=platform, 
-           image_repo=image_repo, tftp_dir=tftp_dir, tftp_server_ip=tftp_server_ip)
+           image_repo=image_repo, tftp_dir=tftp_dir, tftp_server_ip=tftp_server_ip,
+           db_collection=db_collection, psat_unzip_output_folder=psat_unzip_output_folder,
+           psat_job_file=psat_job_file, ixia_chassis_ip=ixia_chassis_ip, get_score=get_score)
 
 
     # CREATE UNIQUIE JOBFILE NAME
@@ -1061,8 +1107,6 @@ def main():
     os.system('rm {} {}'.format(jobfilename, yamfilename))
 
 
-
-
 if __name__ == '__main__':
     app.secret_key = 'super secret key'
-    app.run(debug=True, port=1112, host='mastarke-lnx-v2')
+    app.run(debug=True, port=1111, host='mastarke-lnx-v2')
