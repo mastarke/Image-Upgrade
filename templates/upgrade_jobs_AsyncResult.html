@@ -14,10 +14,10 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>Task ID</th>
-      <th>State</th>
       <th>Date</th>
+      <th>State</th>
       <th>Job Name</th>
+      <th>Task ID</th>
     </tr>
   </thead>
   <tbody>
@@ -25,10 +25,10 @@
     <tr class="">
     	
 	      <td>{{loop.index}}</td>
+          <td>{{date}}</td>
+          <td>{{state}}</td>
+          <td>{{jobname}}</td>
 	      	<td>{{task}}</td>
-	      	<td>{{state}}</td>
-	      	<td>{{date}}</td>
-	      	<td>{{jobname}}</td>
       {% endfor %}
     </tr>
   </tbody>

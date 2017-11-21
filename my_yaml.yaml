@@ -8,7 +8,7 @@ testbed:
                 rootdir: /auto/tftpboot/mastarke
             server: sj20lab-tftp4
 devices:
-    R6:
+    R3:
         type: 'asr9k-x64'
         connections:
             a:
@@ -17,10 +17,10 @@ devices:
                 protocol: telnet
             vty_1:
                 protocol : telnet
-                ip : "1.83.57.88"
+                ip : "1.83.57.82"
             vty_2:
                 protocol : telnet
-                ip : "1.83.57.88"
+                ip : "1.83.57.82"
         tacacs:
             login_prompt: "Username:"
             password_prompt: "Password:"

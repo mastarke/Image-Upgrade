@@ -248,6 +248,67 @@ def running_config_checker(original_cfg, new_cfg):
 
     return ''.join(diff)
 
+
+def modify_psat_jobfile_tgen_setting(psat_job_file):
+
+    '''USED TO CHANGE PSAT JOBFILE TGEN SETTING OFF AS THIS WILL CAUSE
+       ISSUE WITH EACH USER HLTAPI ENVIORMENT VARIABLES.
+    '''
+
+    with open(psat_job_file, 'r') as file:
+        # READ A LIST OF LINES INTO DATA
+        data = file.readlines()
+
+    log.info('CURRENT JOB FILE SETTING IS')
+    for line in data:
+        log.info(line)
+
+    # SEARCH FILE DATA FOR -USETGN ARGUMNET 
+    line_num = 0
+    for line in data:   
+        if re.search('-useTGN +\d+', line):
+            log.info('PSAT JOB FILE TGEN LINE FOUND ON LINE {} AND CURRENT SETTING IS {}'.format(line_num, line))
+            tgen_match = re.search(r'-useTGN +(\d+)', line)
+            tgen_match_line_num = line_num
+
+        if re.search('-checkTrafficLoss +\d+', line):
+            log.info('PSAT JOB FILE CHECK TRAFFIC LOSS LINE FOUND ON LINE {} AND CURRENT SETTING IS {}'.format(line_num, line))
+            check_traffic_match = re.search(r'-checkTrafficLoss +(\d+)', line)
+            check_traffic_match_line_num = line_num
+
+        line_num += 1
+
+    # CHECKING IF USER TGEN SETTING IS ON OR OFF
+    try:
+         if tgen_match.group(1) == '1':
+            # IF ON CHANGE VALUE TO 0
+            data[tgen_match_line_num] = '    -useTGN 0 \\\n'
+            log.info('CHANGE PSAT JOBFILE TGEN ARGUMENT TO {}'.format(data[tgen_match_line_num]))
+         else:
+            log.info('USER JOB FILE ALREADY HAS TURNED OFF TGEN ARGUMENT')
+    except:
+         log.info('tgen_match.group(1) not found')
+
+    # CHECKING IF USER CHECK TRAFFIC SETTING IS ON OR OFF
+    try:
+         if check_traffic_match.group(1) == '1':
+            # IF ON CHANGE VALUE TO 0
+            data[check_traffic_match_line_num] = '    -checkTrafficLoss 0 \\\n'
+            log.info('CHANGE PSAT JOBFILE CHECK TRAFFIC LOSS ARGUMENT TO {}'.format(data[tgen_match_line_num]))
+         else:
+            log.info('USER JOB FILE ALREADY HAS TURNED OFF TRAFFIC CHECK')
+    except:
+         log.info('tgen_match.group(1) not found')
+
+
+    log.info('MODIFIED JOB FILE SETTING IS')
+    for line in data:
+        log.info(line)
+
+    # AND WRITE EVERYTHING BACK TO JOB FILE
+    with open(psat_job_file, 'w') as file:
+        file.writelines( data )
+
 class Common_setup(aetest.CommonSetup):
     """Common Setup section."""
 
@@ -265,7 +326,10 @@ class Common_setup(aetest.CommonSetup):
         get_score = ScriptArgs.get_score
     except:
         get_score = None
-        print('Setting get_score to {}'.format(get_score))
+        log.info('Setting get_score to {}'.format(get_score))
+
+    
+    log.info(banner('get_score has been set to {}'.format(get_score)))
 
 
     # IMPORT YAML FILE ATTRIBUTES
@@ -318,7 +382,8 @@ class Common_setup(aetest.CommonSetup):
 
     if lc_result != 0:
         self.failed('LC did not return to up state.')
-
+    
+    log.info(banner('get_score has been set to {}'.format(get_score)))
     if get_score == True:
 
         # DATABASE ARGUMENTS
@@ -339,7 +404,11 @@ class Common_setup(aetest.CommonSetup):
             log.info('Ixia not connected')
 
         log.info('STARTING IXIA TRAFFIC...PLEASE WAIT')
-        ixia.startTraffic()
+        try:
+            ixia.startTraffic()
+        except:
+            log.info('ERROR STARTING IXIA TRAFFIC')
+        
         time.sleep(180)
 
         # CALLING RTR LOGGING FUNCTION
@@ -673,130 +742,143 @@ class ImageUpgrade(aetest.Testcase):
         else:
             install_commit = cs.rtr.mgmt1.execute('install commit')
 
-            # REMOVE INACTIVE IMAGES
-            remove_inactive_pies(cs.rtr, cs.os_type)
+        # REMOVE INACTIVE IMAGES
+        remove_inactive_pies(cs.rtr, cs.os_type)
 
-            if cs.get_score == True:
+        if cs.get_score == True:
 
-                # TAKING CURRENT TIME - STARTING TIME
-                elapsed_time=time.time()-start_time
-                total_upgrade_time = int(elapsed_time/60)
+            # TAKING CURRENT TIME - STARTING TIME
+            elapsed_time=time.time()-start_time
+            total_upgrade_time = int(elapsed_time/60)
 
-                # GETTING ACTIVE IMAGE ON TESTBED
-                current_image = cs.rtr.mgmt1.execute('show install active summary | ex CSC')
-                # GETTING RELEASE NUMBER EXAMPLE : 6.2.1.34I
-                cur_image = re.search(r'(\d+\.\d+\.\d+).(\d+)(\w+)', current_image)
+            # GETTING ACTIVE IMAGE ON TESTBED
+            current_image = cs.rtr.mgmt1.execute('show install active summary | ex CSC')
+            # GETTING RELEASE NUMBER EXAMPLE : 6.2.1.34I
+            cur_image = re.search(r'(\d+\.\d+\.\d+).(\d+)(\w+)', current_image)
 
-                # GET PIES THAT WERE LOADED ON TESTBED
-                upgrade_pies = re.findall(r'\w+-(\w+)-', all_images)
+            # GET PIES THAT WERE LOADED ON TESTBED
+            upgrade_pies = re.findall(r'\w+-(\w+)-', all_images)
 
-                # GET TOTAL SIZE OF PIES INSTALLED
-                image_size = get_total_image_size(cs.user_tftp_dir,all_images)
+            # GET TOTAL SIZE OF PIES INSTALLED
+            image_size = get_total_image_size(cs.user_tftp_dir,all_images)
 
-                meritData = {}
-                meritData['post_upgrade_image'] = cur_image.group(0)
-                meritData['upgrade_time'] = total_upgrade_time
-                meritData['upgrade_pies'] = upgrade_pies
-                meritData['image_size'] = image_size
+            meritData = {}
+            meritData['post_upgrade_image'] = cur_image.group(0)
+            meritData['upgrade_time'] = total_upgrade_time
+            meritData['upgrade_pies'] = upgrade_pies
+            meritData['image_size'] = image_size
 
-                cs.db_insert_data_dict.update(meritData)
-                
-                log.info('allowing some time for protocols to converge '
-                         'before checking ixia traffic stream data')
-                time.sleep(120) 
-
-                log.info(banner('Starting Post Traffic Check'))
-                
-                # CALLING RTR LOGGING FUNCTION
-                cur_image, post_upgrade_data_dict = \
-                    meritAPI.Report.rtr_log(cs.rtr, traffic_state='post_traffic')
-
-                # SETTING RELEASE VERSION
-                release = cur_image.group(1)
-
-                # CALLING PRE TRAFFIC CHECK METHOD
-                post_traffic_stream_data = \
-                    meritAPI.Traffic_data.traffic_check(cs.ixia, traffic_state='post_traffic')
-                    
-                # SEND DATA TO LOG
-                update_data_dict = \
-                    meritAPI.Report.traffic_log(traffic_state='post_traffic', 
-                                                traffic_dict=post_traffic_stream_data)
-
-                traffic_score = meritAPI.Report.traffic_score(release, 
-                                                              cs.pre_traffic_stream_data, 
-                                                              post_traffic_stream_data)
-
-                # GETTING CONFIG AFTER IMAGE UPGRADE AND CHECKING DIFF
-                post_upgrade_config = cs.rtr.mgmt1.execute('show run')
-                diff_config_output = running_config_checker(cs.pre_upgrade_config, post_upgrade_config)
-                diff_config_dict = {}
-                diff_config_dict['Config Comparison Diff'] = diff_config_output
-
-                cs.db_insert_data_dict.update(diff_config_dict)
-                cs.db_insert_data_dict.update(post_upgrade_data_dict)
-                cs.db_insert_data_dict.update(update_data_dict)
-                cs.db_insert_data_dict.update(traffic_score)
-
-                log.info('Stopping ixia PSAT will restart')
-                cs.ixia.stopTraffic()
-                time.sleep(180)
-
-                log.info(banner('Starting PSAT portion of sript'))
+            cs.db_insert_data_dict.update(meritData)
             
-                # CHECKING PSAT DIRCTORY IF EXISTING PSAT REPORT FILE EXIST
-                psat_files_exist = os.popen('ls {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)).read()
+            log.info('allowing some time for protocols to converge '
+                     'before checking ixia traffic stream data')
+            time.sleep(120) 
 
-                log.info('PSAT Folder {}/ has the following content \n\n{}'.format(cs.ScriptArgs.psat_unzip_output_folder, 
-                                                                                   psat_files_exist))
+            log.info(banner('Starting Post Traffic Check'))
+            
+            # CALLING RTR LOGGING FUNCTION
+            cur_image, post_upgrade_data_dict = \
+                meritAPI.Report.rtr_log(cs.rtr, traffic_state='post_traffic')
 
-                # CLEANING PSAT DIECTORY
-                try:
-                    log.info('Cleaning folder {}/ before running psat'.format(cs.ScriptArgs.psat_unzip_output_folder))
-                    os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
-                except:
-                    log.info('No file found')
+            # SETTING RELEASE VERSION
+            release = cur_image.group(1)
 
-                log.info(banner('Starting PSAT'))
-                psat_cmd = 'autoeasy {} -archive_dir {}/'.format(cs.ScriptArgs.psat_job_file, 
-                                                                cs.ScriptArgs.psat_unzip_output_folder)
+            # CALLING PRE TRAFFIC CHECK METHOD
+            post_traffic_stream_data = \
+                meritAPI.Traffic_data.traffic_check(cs.ixia, traffic_state='post_traffic')
+                
+            # SEND DATA TO LOG
+            update_data_dict = \
+                meritAPI.Report.traffic_log(traffic_state='post_traffic', 
+                                            traffic_dict=post_traffic_stream_data)
 
-                log.info('running cmd {}'.format(psat_cmd))
-                os.system(psat_cmd)
+            traffic_score = meritAPI.Report.traffic_score(release, 
+                                                          cs.pre_traffic_stream_data, 
+                                                          post_traffic_stream_data)
 
-                log.info(banner('Unzipping psat file'))
-                os.system('unzip {}/* -d {}/'.format(cs.ScriptArgs.psat_unzip_output_folder, 
-                                                   cs.ScriptArgs.psat_unzip_output_folder))
+            # GETTING CONFIG AFTER IMAGE UPGRADE AND CHECKING DIFF
+            post_upgrade_config = cs.rtr.mgmt1.execute('show run')
+            diff_config_output = running_config_checker(cs.pre_upgrade_config, post_upgrade_config)
+            diff_config_dict = {}
+            diff_config_dict['Config Comparison Diff'] = diff_config_output
 
-                log.info(banner('calling score function'))
-                # CALLING MERIT PSAT SCORE CALU FUNCTION
-                psat_data_dict = \
-                    meritAPI.Psat_logging.psat_results_to_db(cs.db_insert_data_dict['merit_traffic_score'],
-                                                             cs.ScriptArgs.psat_unzip_output_folder)
+            cs.db_insert_data_dict.update(diff_config_dict)
+            cs.db_insert_data_dict.update(post_upgrade_data_dict)
+            cs.db_insert_data_dict.update(update_data_dict)
+            cs.db_insert_data_dict.update(traffic_score)
 
-                # APPEND TO DICT
-                cs.db_insert_data_dict.update(psat_data_dict)
+            log.info('STOPPING IXIA PSAT WILL RESTART')
+            try:
+                cs.ixia.stopTraffic()
+                log.info('IXIA TRAFFIC STOPPED SUCCESSFULLY')
+            except:
+                log.info('ERROR STOPPING IXIA TRAFFIC')
 
-                log.info(banner('Clearing PSAT Folder {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)))
-                try:
-                    os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
-                except:
-                    log.info('No file found')
+            time.sleep(180)
+
+            log.info(banner('STARTING PSAT PORTION OF SRIPT'))
+        
+            # CHECKING PSAT DIRCTORY IF EXISTING PSAT REPORT FILE EXIST
+            psat_files_exist = os.popen('ls {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)).read()
+
+            log.info('PSAT Folder {}/ has the following content \n\n{}'.format(cs.ScriptArgs.psat_unzip_output_folder, 
+                                                                               psat_files_exist))
+
+            # CLEANING PSAT DIECTORY
+            try:
+                log.info('Cleaning folder {}/ before running psat'.format(cs.ScriptArgs.psat_unzip_output_folder))
+                os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
+            except:
+                log.info('No file found')
+            
+            log.info(banner('Modify psat file'))
+            modify_psat_jobfile_tgen_setting(cs.ScriptArgs.psat_job_file)
+
+            log.info(banner('Starting PSAT'))
+            psat_cmd = 'autoeasy {} -archive_dir {}/'.format(cs.ScriptArgs.psat_job_file, 
+                                                            cs.ScriptArgs.psat_unzip_output_folder)
+
+            log.info('running cmd {}'.format(psat_cmd))
+            os.system(psat_cmd)
+
+            log.info(banner('Unzipping psat file'))
+            os.system('unzip {}/* -d {}/'.format(cs.ScriptArgs.psat_unzip_output_folder, 
+                                               cs.ScriptArgs.psat_unzip_output_folder))
+            
+            # CHECKING PSAT DIRCTORY IF EXISTING PSAT REPORT FILE EXIST
+            psat_files_exist = os.popen('ls {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)).read()
+            log.info('PSAT Folder {}/ has the following content \n\n{}'.format(cs.ScriptArgs.psat_unzip_output_folder, 
+                                                                               psat_files_exist))
+            
+            log.info(banner('calling score function'))
+            # CALLING MERIT PSAT SCORE CALU FUNCTION
+            psat_data_dict = \
+                meritAPI.Psat_logging.psat_results_to_db(cs.db_insert_data_dict['merit_traffic_score'],
+                                                         cs.ScriptArgs.psat_unzip_output_folder)
+
+            # APPEND TO DICT
+            cs.db_insert_data_dict.update(psat_data_dict)
+
+            log.info(banner('Clearing PSAT Folder {}/'.format(cs.ScriptArgs.psat_unzip_output_folder)))
+            try:
+                os.system('rm {}/*'.format(cs.ScriptArgs.psat_unzip_output_folder))
+            except:
+                log.info('No file found')
 
 
-                # CONNECT TO DB
-                db = MongoClient(cs.db_host)
-                # CREATE DB CALLED meritDB
-                dbName = db[cs.db_name]
-                # CREATE A COLLECTION CALLED meritData
-                collection_name = dbName[cs.db_collection]
+            # CONNECT TO DB
+            db = MongoClient(cs.db_host)
+            # CREATE DB CALLED meritDB
+            dbName = db[cs.db_name]
+            # CREATE A COLLECTION CALLED meritData
+            collection_name = dbName[cs.db_collection]
 
-                # PUSH DATA INTO DATABASE
-                db_id = collection_name.insert_one(cs.db_insert_data_dict).inserted_id
+            # PUSH DATA INTO DATABASE
+            db_id = collection_name.insert_one(cs.db_insert_data_dict).inserted_id
 
-                log.info('db entry is {}'.format(db_id))
+            log.info('db entry is {}'.format(db_id))
 
-                db.close()
+            db.close()
                 
 
     @aetest.cleanup

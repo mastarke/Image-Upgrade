@@ -105,7 +105,12 @@ class Traffic_data(object):
 
         log.info('CLEARING IXIA STATS PLEASE WAIT...')
         # CLEAR IXIA COUNTERS
-        ixia.clearStats()
+        try:
+            ixia.clearStats()
+            log.info('IXIA STATS CLEARED SUCCESSFULLY')
+        except:
+            log.info('ERROR CLEARING IXIA STATS')
+
         time.sleep(180)
 
         traffic_stream_data = Traffic_data.traffic_stream_data(ixia)
