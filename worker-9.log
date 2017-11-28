@@ -1,0 +1,12 @@
+[2017-11-21 12:13:22,401: INFO/ForkPoolWorker-9] app.script_runner[2bf57ee4-479b-4a6e-9ebf-d499a3bb510c]: ###  Matthew in script_runner celery task  ###
+[2017-11-21 12:16:26,606: INFO/ForkPoolWorker-9] app.script_runner[2bf57ee4-479b-4a6e-9ebf-d499a3bb510c]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-21 12:16:26,607: INFO/ForkPoolWorker-9] app.script_runner[2bf57ee4-479b-4a6e-9ebf-d499a3bb510c]: ###  Matthew in script_runner removing jobfile jobfile-f3b73c3f-73d8-4945-87f1-d883e8d14549.py  ###
+[2017-11-21 12:16:26,624: INFO/ForkPoolWorker-9] Task app.script_runner[2bf57ee4-479b-4a6e-9ebf-d499a3bb510c] succeeded in 184.24904103763402s: None
+[2017-11-22 07:42:12,667: INFO/ForkPoolWorker-9] app.script_runner[40e39926-9ff3-47c0-a5cd-4a1b4f07ac41]: ###  Matthew in script_runner celery task  ###
+[2017-11-22 08:44:23,332: INFO/ForkPoolWorker-9] app.script_runner[40e39926-9ff3-47c0-a5cd-4a1b4f07ac41]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-22 08:44:23,333: INFO/ForkPoolWorker-9] app.script_runner[40e39926-9ff3-47c0-a5cd-4a1b4f07ac41]: ###  Matthew in script_runner removing jobfile jobfile-9489f9b6-2083-471d-ae0c-ff77b767c3ce.py  ###
+[2017-11-22 08:44:23,362: INFO/ForkPoolWorker-9] Task app.script_runner[40e39926-9ff3-47c0-a5cd-4a1b4f07ac41] succeeded in 3730.7496062424034s: None
+[2017-11-27 19:19:51,295: INFO/ForkPoolWorker-9] app.script_runner[35d39512-6045-4081-9426-2d8249cf1079]: ###  Matthew in script_runner celery task  ###
+[2017-11-27 19:22:12,578: INFO/ForkPoolWorker-9] app.script_runner[35d39512-6045-4081-9426-2d8249cf1079]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-27 19:22:12,580: INFO/ForkPoolWorker-9] app.script_runner[35d39512-6045-4081-9426-2d8249cf1079]: ###  Matthew in script_runner removing jobfile jobfile-8c803160-91ef-44f8-9ac7-f4e3bffe96bb.py  ###
+[2017-11-27 19:22:12,599: INFO/ForkPoolWorker-9] Task app.script_runner[35d39512-6045-4081-9426-2d8249cf1079] succeeded in 141.31513932161033s: None

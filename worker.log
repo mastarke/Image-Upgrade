@@ -64,3 +64,30 @@
 [2017-11-21 07:55:51,590: INFO/MainProcess] Received task: app.script_runner[f8bec2af-22d9-46a0-beb3-e8df6f940af5]  
 [2017-11-21 09:10:17,667: INFO/MainProcess] Received task: app.script_runner[2a36dba5-a8db-48e0-8dc0-3e3ec727a22b]  
 [2017-11-21 09:45:21,398: INFO/MainProcess] Received task: app.script_runner[03d2d9c5-eeb1-4c56-b176-279c2ab05638]  
+[2017-11-21 11:44:52,070: INFO/MainProcess] Connected to amqp://guest:**@127.0.0.1:5672//
+[2017-11-21 11:44:52,083: INFO/MainProcess] mingle: searching for neighbors
+[2017-11-21 11:44:53,106: INFO/MainProcess] mingle: all alone
+[2017-11-21 11:44:53,131: INFO/MainProcess] worker@mastarke-lnx-v2 ready.
+[2017-11-21 12:07:05,895: INFO/MainProcess] Received task: app.script_runner[0a74efe7-120f-4ae5-ade5-bc837666bd8f]  
+[2017-11-21 12:08:23,812: INFO/MainProcess] Received task: app.script_runner[97e1dc6f-dcff-410d-b7e2-c9d5c8b5c317]  
+[2017-11-21 12:09:41,041: INFO/MainProcess] Received task: app.script_runner[6498574f-5d37-434c-ac05-2ca74c6b7094]  
+[2017-11-21 12:12:02,794: INFO/MainProcess] Received task: app.script_runner[6b572acb-d807-4bd5-94d3-3eff08646ed9]  
+[2017-11-21 12:13:22,372: INFO/MainProcess] Received task: app.script_runner[2bf57ee4-479b-4a6e-9ebf-d499a3bb510c]  
+[2017-11-21 12:15:34,254: INFO/MainProcess] Received task: app.script_runner[2f6c2a4f-548e-45cb-9ced-94967dd4bc1e]  
+[2017-11-21 17:47:19,965: INFO/MainProcess] Received task: app.script_runner[f91faa3c-87ab-456f-a8be-d5eea9010539]  
+[2017-11-21 17:54:41,321: INFO/MainProcess] Received task: app.script_runner[205405c6-1362-4ec6-ab42-41c06d0499f2]  
+[2017-11-22 07:42:12,600: INFO/MainProcess] Received task: app.script_runner[40e39926-9ff3-47c0-a5cd-4a1b4f07ac41]  
+[2017-11-22 08:50:06,514: INFO/MainProcess] Received task: app.script_runner[959b6054-1c9f-4866-8e88-2db86a1612f2]  
+[2017-11-22 08:53:38,296: INFO/MainProcess] Received task: app.script_runner[5be27f6a-69a2-4430-81a4-a50717fa1559]  
+[2017-11-22 09:11:29,914: INFO/MainProcess] Received task: app.script_runner[bbd12841-9262-4e6b-8328-03545fdfdd05]  
+[2017-11-22 09:52:34,886: INFO/MainProcess] Received task: app.script_runner[91ea51d4-3811-44ef-b981-72758f451f2d]  
+[2017-11-27 19:19:51,280: INFO/MainProcess] Received task: app.script_runner[35d39512-6045-4081-9426-2d8249cf1079]  
+[2017-11-27 19:45:45,643: INFO/MainProcess] Connected to amqp://guest:**@127.0.0.1:5672//
+[2017-11-27 19:45:45,655: INFO/MainProcess] mingle: searching for neighbors
+[2017-11-27 19:45:46,678: INFO/MainProcess] mingle: all alone
+[2017-11-27 19:45:46,702: INFO/MainProcess] worker@mastarke-lnx-v2 ready.
+[2017-11-27 19:47:19,253: INFO/MainProcess] Received task: app.script_runner[33949124-4c24-4c71-8fc7-4ec8aa82a3f7]  
+[2017-11-27 20:10:47,452: INFO/MainProcess] Received task: app.script_runner[ef37c582-a4fb-474a-9305-b18b1ab53584]  
+[2017-11-27 21:10:20,241: INFO/MainProcess] Received task: app.script_runner[75ee5731-0c04-4b3b-b64c-16bf93dd3019]  
+[2017-11-27 22:10:30,679: INFO/MainProcess] Received task: app.script_runner[c1f76df6-a9ca-4fde-a93f-7cb9fbf47ceb]  
+[2017-11-28 10:19:33,173: INFO/MainProcess] Received task: app.script_runner[9bcfb461-3c61-45c8-85fc-54ab8fb63ab7]  

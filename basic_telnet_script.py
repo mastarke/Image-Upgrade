@@ -359,9 +359,12 @@ class Common_setup(aetest.CommonSetup):
 
     # CHECK PLATFORM TYPE 
     platform = rtr.mgmt1.adminexec('show inventory chassis')
-    m = re.search(r'Descr: +(NCS\d+|ASR-\d+|"ASR \d+|ASR +\d+)', platform, re.IGNORECASE)
-    log.info('Matthew m.group is {}'.format(m.group(0)))
-    platform = m.group(0)
+    m = re.search(r'Descr: +(NCS\d+|ASR-\d+|"ASR \d+|ASR +\d+|"ASR-\d+)', platform, re.IGNORECASE)
+    try:
+        log.info('Matthew m.group is {}'.format(m.group(0)))
+        platform = m.group(0)
+    except:
+        log.info('COULD NOT MATCH PLATFORM TYPE IN REGEX')
     
     if 'NCS' in platform or 'ncs' in platform:
         log.info('ncs platform type  {}'.format(platform))
@@ -593,7 +596,7 @@ class ImageUpgrade(aetest.Testcase):
 
         # POLLING SYSTEM FOR TESTBED TO RELOAD
         count = 1
-        end_count = 120
+        end_count = 150
         while count <= end_count:
             if cs.os_type == 'cXR':
                 # START A PING TO SYSTEM TO KNOW WHEN CONNECTION WILL BE LOST

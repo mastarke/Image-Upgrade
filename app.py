@@ -1,30 +1,21 @@
 from flask import (Flask, render_template, flash, redirect,
                    url_for, session, logging, request, g)
-# from wtforms import (Form, StringField, TextAreaField, TextField, PasswordField)
-from logging.handlers import RotatingFileHandler
 from flask_pymongo import PyMongo
 import pymongo
-from functools import wraps
-import json
-from flask import jsonify
-from flask_mail import Mail, Message
 from collections import OrderedDict
 import re
 from bson import ObjectId
 import os
-from ats.log.utils import banner
-from ats.easypy import runtime
-from ats import aetest
-from ats.topology import loader
 from celery import Celery
-# from hltapi import Ixia
 from Flask_celery import make_celery
-import time
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 import uuid
 import datetime
-import itertools
+import sys
+sys.path.insert(0, '/ws/mastarke-sjc/my_local_git/image_picker_site/api_files')
+from IxNetRest import *
+import meritAPI 
 
 
 
@@ -61,7 +52,6 @@ celery = make_celery(app)
 logger = get_task_logger(__name__)
 
 app.selected_collection = None
-
 
 
 # INIT MONGODB
@@ -217,14 +207,6 @@ def get_rp_lc_hw_types(db_coll):
     return lc_types, rsp_types, os_types_in_db,
 
 
-def send_install_cmd(ip_addr, username, password, rtr_hostname, install_cmd, result=0):
-
-    """Used to send install command via pexpect. This is prefered as Csccon
-       does not handle the cXR install add command well."""
-
-   
-
-    return result
 
 def dynamic_yaml(hostname, mgmt_ip, rtr_username, rtr_password):
     yaml_file = {
@@ -285,8 +267,45 @@ def dynamic_yaml(hostname, mgmt_ip, rtr_username, rtr_password):
 
     return yaml_file
 
-def install_active(ip_addr, username, password, result=0):
-    """Check if Pam is running on eXR router."""
+def install_image(ip_addr, username, password, get_install_active=True):
+    """CHECK INSTALLED ACTIVE IMAGES ON ROUTER."""
+
+    if get_install_active == True:
+        cmd = 'show install active summary'
+    else:
+        cmd = 'show install committed summary'
+
+
+    import pexpect
+    try:
+        # LOGGING INTO ROUTER
+        print('Pexpect logging into router.')
+        child = pexpect.spawn('telnet {}'.format(ip_addr))
+        child.expect ('Username: ')
+        child.sendline ('{}'.format(username))
+        child.expect ('Password:', timeout=90)
+        child.sendline ('{}'.format(password))
+        child.expect ('#')
+        print('Pexpect going to admin prompt.')
+        child.sendline(cmd)
+        child.expect ('#')
+
+        output = child.before
+        # CONVERT TYPE BYTES TO STRING TYPE
+        str_output = output.decode('utf-8')
+        
+        for line in str_output.split('\n'):
+            print(line)
+
+        child.close()
+    except:
+        str_output = ('Pexpect failed to telnet to router. Please ensure VTY '
+                     'line is enabled on your router')
+    
+    return str_output
+
+def rtr_os_type(ip_addr, username, password, result=0):
+    """CHECK ROUTER OS TYPE."""
 
     import pexpect
     import pprint
@@ -299,7 +318,7 @@ def install_active(ip_addr, username, password, result=0):
     child.sendline ('{}'.format(password))
     child.expect ('#')
     print('Pexpect going to admin prompt.')
-    child.sendline('show install active summary')
+    child.sendline('bash -c uname -a')
     child.expect ('#')
 
     output = child.before
@@ -310,8 +329,15 @@ def install_active(ip_addr, username, password, result=0):
         print(line)
 
     child.close()
+
+    if 'Linux' in str_output:
+        print('OS TYPE IS eXR')
+        os_type = 'eXR'
+    else:
+        print('OS TYPE IS cXR')
+        os_type = 'cXR'
     
-    return str_output
+    return os_type
         
 # INDEX
 @app.route('/', methods=['GET', 'POST'])
@@ -367,7 +393,11 @@ def packages():
 
     get_score = session.get('get_score', None)
 
-    app.logger.info('Matthew get_score is {}'.format(get_score))
+    ixia_connection = None
+    ixia_chassis_ip = None
+    install_active_output = None
+    install_commited_output = None
+    os_type = None
 
     if request.method == 'POST':
         image = request.form['image']
@@ -401,7 +431,11 @@ def packages():
         app.logger.info('Matthew ping result is {}'.format(ping_result))
 
         if ping_result == True:
-            install_output = install_active(rtr_mgmt_ip, rtr_username, rtr_password)
+            
+            # GET THE INSTALLED ACTIVE IMAGE ON THE ROUTER
+            install_active_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password)
+            # GET THE INSALLED COMMITED IMAGE ON THE ROUTER
+            install_commited_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password, False)
         
             command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
                          '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
@@ -417,6 +451,10 @@ def packages():
 
             packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
             pies = re.findall(r'\w+.*', packages)
+            
+            # GETTING OS TYPE ON ROUTER
+            os_type = rtr_os_type(rtr_mgmt_ip, rtr_username, rtr_password)
+            app.logger.info('Matthe pexpect found router os_type as {}'.format(os_type))
 
             if request.method == 'POST' and get_score == True:
                 app.logger.info('upgrade with score')
@@ -432,12 +470,18 @@ def packages():
 
                 app.logger.info('Matthew ixia_chassis_ip is {} db_collection is {} psat_job_file is {} psat_unzip_output_folder is {} '.format(ixia_chassis_ip, db_collection, psat_job_file, psat_unzip_output_folder))
 
-            
-            return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip, 
-                                                     install_output=install_output)
+                try:
+                    ixia = IxNetRestMain(ixia_chassis_ip, '11009')
+                    ixia_connection = True
+                except:
+                    ixia_connection = False
 
-        else:
-            return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip)
+    return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip, 
+                                             install_active_output=install_active_output, 
+                                             install_commited_output=install_commited_output,
+                                             ixia_connection=ixia_connection, 
+                                             ixia_chassis_ip=ixia_chassis_ip, os_type=os_type, 
+                                             image=image, platform=platform)
 
 
 @app.route('/copycmd', methods=['GET', 'POST'])
@@ -484,7 +528,7 @@ def install_on_rtr():
         job_taskid = AsyncResult(result.task_id)
         mongo.db.job_task_id.insert({'taskid': str(job_taskid), 
                                      'jobname':'Upgrade host ' + rtr_hostname + ' Mgmt ' + rtr_mgmt_ip + ' Chassis ' + platform, 
-                                     'date':datetime.datetime.now().strftime("%m-%d-%y %H:%M:%S")})
+                                     'date':datetime.datetime.now().strftime("%m-%d-%y")})
 
 
     return render_template('install_on_rtr.html', ping_result=0, job_taskid=str(job_taskid))
@@ -496,9 +540,9 @@ def upgrade_jobs_AsyncResult():
 
 
     # GET ALL TASK ID'S 
-    taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
-    taskdate_list_data = mongo.db.job_task_id.find({}, {'date':1,'_id':0}).sort('date',pymongo.ASCENDING)
-    jobname_list_data = mongo.db.job_task_id.find({}, {'jobname':1,'_id':0}).sort('date',pymongo.ASCENDING)
+    taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.DESCENDING)
+    taskdate_list_data = mongo.db.job_task_id.find({}, {'date':1,'_id':0}).sort('date',pymongo.DESCENDING)
+    jobname_list_data = mongo.db.job_task_id.find({}, {'jobname':1,'_id':0}).sort('date',pymongo.DESCENDING)
 
     # UNPACK TASKID CURSOR OBJECT
     taskid_list = []
@@ -964,43 +1008,6 @@ def diff_config_checker(runDate, queryKey, singleId):
     return render_template("diff_config.html", runDate=runDate,
                                                 queryKey=queryKey,
                                                 diff_config=diff_config)
-
-
-@app.route('/process/')
-def process():
-
-    result = math.delay(10, 20)
-    math.delay(state='PROGRESS')
-
-    job_taskid = AsyncResult(result.task_id)
-    mongo.db.job_task_id.insert({'taskid': str(job_taskid), 'jobname':'somename'})
-
-    return 'async resquest sent'
-
-@app.route('/job_status')
-def job_status():
-
-    taskid_dict = {}
-
-
-    # GET ALL TASK ID'S 
-    taskid_list_data = mongo.db.job_task_id.find({}, {'taskid':1,'_id':0}).sort('date',pymongo.ASCENDING)
-
-    # UNPACK TASKID CURSOR OBJECT
-    taskid_list = []
-    for r in taskid_list_data:
-        try:
-            taskid_list.append(r['taskid'])
-        except:
-            app.logger.info('taskid key value not found in mongoDB')
-
-
-    for item in taskid_list:
-        taskid_dict[item] = math.AsyncResult(item).state
-        app.logger.info('for {} state is {} '.format(item, math.AsyncResult(item).state))
-
-
-    return render_template('upgrade_jobs_AsyncResult.html', taskid_dict=taskid_dict)
 
 
 @celery.task(name='app.script_runner')

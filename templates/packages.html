@@ -51,7 +51,7 @@
 
   <div class="alert alert-dismissible alert-danger">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable.</p>
+    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable. And you can ping site server 123.100.104.212</p>
   </div>
 
 {% elif ping_result == True and ixia_connection == False %}
@@ -63,7 +63,7 @@
 {% elif ping_result == False and ixia_connection == False %}
   <div class="alert alert-dismissible alert-danger">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <p>Both Testbed {{rtr_mgmt_ip}} and ixia {{ixia_chassis_ip}} was not reachable.</p>
+      <p>Both Testbed {{rtr_mgmt_ip}} and ixia {{ixia_chassis_ip}} was not reachable. Please make sure your router and IXIA are reachabel to site server at 123.100.104.212</p>
   </div>
 
 {% else %}
@@ -75,16 +75,36 @@
 {% endif %}
 
 
-
 {% if ping_result == True %}
-<h4>Currently installed packages on router</h4>
-<hr>
-   {% for line in install_output.split('\n') %}
-        <small>{{line}}</small><br>
-    {% endfor %}
+
+<div> 
+  <br>
+  <br>
+  <br>
+  <div class="alert alert-dismissible alert-info">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p>Please ensure that your active and commited router packages are in sync before proceding  with an upgrade </p>
+  </div>
+  <br>
+  <div style="width: 100%;">
+     <div style="float:left; width: 30%">
+        <h4>Active packages on router</h4>
+        <hr>
+           {% for line in install_active_output.split('\n') %}
+                <small>{{line}}</small><br>
+            {% endfor %}
+     </div>
+     <div style="float:right; width: 50%">
+      <h4>Commited packages on router</h4>
+        <hr>
+           {% for line in install_commited_output.split('\n') %}
+                <small>{{line}}</small><br>
+            {% endfor %}
+     </div>
+  </div>
+  </div>
+  <div style="clear:both"></div>
 {%endif%}
-
-
 
 
 
