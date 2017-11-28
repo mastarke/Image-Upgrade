@@ -8,23 +8,73 @@
     <h1>Testbed Reachability</h1>
 </div>
 
-{% if ping_result == True %}
+<!--MAKE SURE USER SELECTED SUPPORTED UPGRADE FOR THEIR ROUTER OS TYPE-->
+{% if os_type == 'eXR' and platform == 'asr9k-px' %}
+
+  <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <p><strong><u>Warning!</u></strong> router OS type is {{os_type}} and you have selected the following platform type {{platform}}. This is eXR to cXR image which is not supported</p>
+  </div>
+
+{% elif os_type == 'cXR' and platform == 'asr9k-x64' or platform == 'ncs5500' %}
+
+  <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <p><strong><u>Warning!</u></strong> router OS type is {{os_type}} and you have selected the following platform type {{platform}}. This is cXR to eXR image which is not supported</p>
+  </div>
+
+{% endif %}
+
+<!--CHECKINNG CONNECTIVITY TO ROUTER AND IXIA IF APPLICABLE-->
+
+{% if ping_result == True and ixia_connection == None %}
   <div class="alert alert-dismissible alert-success">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
-   <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. You may continue with upgrade</p>
+   <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. You may continue with upgrade to <strong><u>{{image}}</u></strong></p>
   </div>
   
   <form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
       <button class="btn btn-info btn-lg" type="submit">Next</button>
   </form>
-{% else %}
+
+{% elif ping_result == True and ixia_connection == True %}
+  <div class="alert alert-dismissible alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+   <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. <strong><u>IXIA chassis {{ixia_chassis_ip}} </u></strong> was also successful. You may continue with upgrade to <strong><u>{{image}}</u></strong></p>
+  </div>
+
+  <form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('copycmd') }}" method="POST">
+      <button class="btn btn-info btn-lg" type="submit">Next</button>
+  </form>
+
+{% elif ping_result == False and ixia_connection == None %}
+
   <div class="alert alert-dismissible alert-danger">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable.
-     you can still copy the command above and directly paste in your router.</p>
+    <p>Testbed for {{rtr_mgmt_ip}} was not reachable. Please ensure your mgmt ip address is reachable.</p>
   </div>
+
+{% elif ping_result == True and ixia_connection == False %}
+  <div class="alert alert-dismissible alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p>Testbed for {{rtr_mgmt_ip}} was reachable, however ixia {{ixia_chassis_ip}} was not reachable. Please ensure your ixia chassis address is reachable.</p>
+    </div>
+
+{% elif ping_result == False and ixia_connection == False %}
+  <div class="alert alert-dismissible alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p>Both Testbed {{rtr_mgmt_ip}} and ixia {{ixia_chassis_ip}} was not reachable.</p>
+  </div>
+
+{% else %}
+  <div class="alert alert-dismissible alert-warning">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p>Something is not right! ixia_connection is {{ixia_connection}} and ping_result is {{ping_result}}</p>
+  </div>
+
 {% endif %}
-   
+
+
 
 {% if ping_result == True %}
 <h4>Currently installed packages on router</h4>
@@ -32,8 +82,9 @@
    {% for line in install_output.split('\n') %}
         <small>{{line}}</small><br>
     {% endfor %}
-
 {%endif%}
+
+
 
 
 
