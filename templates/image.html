@@ -1,11 +1,58 @@
 {%extends 'layout.html'%}
 
 
-
 {%block body%}
+
+
+<style type="text/css">
+  #needs-validation {
+  /* .loader-container will be positionned relative to this */
+  position: relative;
+}
+
+.loader-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(240,240,240,.7);
+  /* hide it at first */
+  display: none;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  /* Light grey */
+  border-top: 16px solid #3498db;
+  /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  /* Add the following to center it */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -38px; /* half its width (border included) */
+  margin-top: -38px; /* half its height */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+
+
+
 <div class="jumbotron text-center">
     <h1>Upgrade router no score</h1>
 </div>
+
+
+
 
 <form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
   <div style="padding-left: 1.0em" class="row">
@@ -67,7 +114,7 @@
           <br>
         </div>
     </div>
-    
+
 
      <div class="row">
         <div class="col-md-5 mb-3">
@@ -88,9 +135,12 @@
           <br>
         </div>
     </div>
-    
-
   <button class="btn btn-info" type="submit">Next</button>
+
+  <div class="loader-container">
+      <div class="loader"></div>
+  </div>
+
 </form>
 
 
@@ -124,5 +174,20 @@
   }, false);
 })();
 </script>
+
+
+<script type="text/javascript">
+  var myForm = document.getElementById('needs-validation');
+
+myForm.addEventListener('submit', showLoader);
+
+function showLoader(e) {
+  this.querySelector('.loader-container').style.display = 'block';
+  // the line below is just for the demo, it stops the form from submitting
+  // so that you can see it works. Don't use it
+  // e.preventDefault();
+}
+</script>
+
 
 {%endblock%}

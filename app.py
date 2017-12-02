@@ -286,7 +286,7 @@ def install_image(ip_addr, username, password, get_install_active=True):
         child.expect ('Password:', timeout=90)
         child.sendline ('{}'.format(password))
         child.expect ('#')
-        print('Pexpect going to admin prompt.')
+        print('Pexpect sending command.')
         child.sendline(cmd)
         child.expect ('#')
 
@@ -436,7 +436,7 @@ def packages():
             install_active_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password)
             # GET THE INSALLED COMMITED IMAGE ON THE ROUTER
             install_commited_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password, False)
-        
+           
             command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
                          '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
                          '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))

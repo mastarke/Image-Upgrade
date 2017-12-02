@@ -2,3 +2,7 @@
 [2017-11-27 22:08:33,691: INFO/ForkPoolWorker-8] app.script_runner[75ee5731-0c04-4b3b-b64c-16bf93dd3019]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
 [2017-11-27 22:08:33,692: INFO/ForkPoolWorker-8] app.script_runner[75ee5731-0c04-4b3b-b64c-16bf93dd3019]: ###  Matthew in script_runner removing jobfile jobfile-764202ce-1c8a-400f-85ad-3c7cff30bfb1.py  ###
 [2017-11-27 22:08:33,725: INFO/ForkPoolWorker-8] Task app.script_runner[75ee5731-0c04-4b3b-b64c-16bf93dd3019] succeeded in 3493.479884814471s: None
+[2017-11-28 14:07:44,509: INFO/ForkPoolWorker-8] app.script_runner[404603a0-c5e6-4415-8c8e-e29c6e4b38aa]: ###  Matthew in script_runner celery task  ###
+[2017-11-28 16:57:36,445: INFO/ForkPoolWorker-8] app.script_runner[404603a0-c5e6-4415-8c8e-e29c6e4b38aa]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-28 16:57:36,449: INFO/ForkPoolWorker-8] app.script_runner[404603a0-c5e6-4415-8c8e-e29c6e4b38aa]: ###  Matthew in script_runner removing jobfile jobfile-4ded0e41-4361-4f9c-b9cd-69e5c7ae581f.py  ###
+[2017-11-28 16:57:36,461: INFO/ForkPoolWorker-8] Task app.script_runner[404603a0-c5e6-4415-8c8e-e29c6e4b38aa] succeeded in 10191.964987240732s: None

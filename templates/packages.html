@@ -1,6 +1,10 @@
 {%extends 'layout.html'%}
 
+
 {%block body%}
+
+
+
 
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css">
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css">
@@ -9,7 +13,9 @@
 </div>
 
 <!--MAKE SURE USER SELECTED SUPPORTED UPGRADE FOR THEIR ROUTER OS TYPE-->
+{% set os_mismatch = False %}
 {% if os_type == 'eXR' and platform == 'asr9k-px' %}
+  {% set os_mismatch = True %}
 
   <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -17,6 +23,7 @@
   </div>
 
 {% elif os_type == 'cXR' and platform == 'asr9k-x64' or platform == 'ncs5500' %}
+  {% set os_mismatch = True %}
 
   <div class="alert alert-dismissible alert-danger">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -27,7 +34,7 @@
 
 <!--CHECKINNG CONNECTIVITY TO ROUTER AND IXIA IF APPLICABLE-->
 
-{% if ping_result == True and ixia_connection == None %}
+{% if ping_result == True and ixia_connection == None and os_mismatch == False %}
   <div class="alert alert-dismissible alert-success">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
    <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. You may continue with upgrade to <strong><u>{{image}}</u></strong></p>
@@ -37,7 +44,7 @@
       <button class="btn btn-info btn-lg" type="submit">Next</button>
   </form>
 
-{% elif ping_result == True and ixia_connection == True %}
+{% elif ping_result == True and ixia_connection == True and os_mismatch == False %}
   <div class="alert alert-dismissible alert-success">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
    <p><u><strong>Success! </strong></u> Testbed <u><strong>{{rtr_mgmt_ip}} </strong></u>is reachable and telnet was successful. <strong><u>IXIA chassis {{ixia_chassis_ip}} </u></strong> was also successful. You may continue with upgrade to <strong><u>{{image}}</u></strong></p>

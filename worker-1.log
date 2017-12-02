@@ -103,3 +103,11 @@ AttributeError: 'module' object has no attribute 'info'
 [2017-11-27 21:04:58,961: INFO/ForkPoolWorker-1] app.script_runner[ef37c582-a4fb-474a-9305-b18b1ab53584]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
 [2017-11-27 21:04:58,961: INFO/ForkPoolWorker-1] app.script_runner[ef37c582-a4fb-474a-9305-b18b1ab53584]: ###  Matthew in script_runner removing jobfile jobfile-2707d529-2de3-43f0-971f-0e30c8a9aa4a.py  ###
 [2017-11-27 21:04:58,996: INFO/ForkPoolWorker-1] Task app.script_runner[ef37c582-a4fb-474a-9305-b18b1ab53584] succeeded in 3251.5408547166735s: None
+[2017-11-28 12:51:00,632: INFO/ForkPoolWorker-1] app.script_runner[078e5535-f080-4bae-ac4f-f00726909bbd]: ###  Matthew in script_runner celery task  ###
+[2017-11-28 13:53:18,881: INFO/ForkPoolWorker-1] app.script_runner[078e5535-f080-4bae-ac4f-f00726909bbd]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-28 13:53:18,882: INFO/ForkPoolWorker-1] app.script_runner[078e5535-f080-4bae-ac4f-f00726909bbd]: ###  Matthew in script_runner removing jobfile jobfile-d4188cc1-6d22-418d-9645-32abe9c87f66.py  ###
+[2017-11-28 13:53:18,919: INFO/ForkPoolWorker-1] Task app.script_runner[078e5535-f080-4bae-ac4f-f00726909bbd] succeeded in 3738.2983837984502s: None
+[2017-11-29 14:22:41,555: INFO/ForkPoolWorker-1] app.script_runner[2da2bc55-1358-4f9b-9fb3-665e16960716]: ###  Matthew in script_runner celery task  ###
+[2017-11-29 15:23:02,304: INFO/ForkPoolWorker-1] app.script_runner[2da2bc55-1358-4f9b-9fb3-665e16960716]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-11-29 15:23:02,304: INFO/ForkPoolWorker-1] app.script_runner[2da2bc55-1358-4f9b-9fb3-665e16960716]: ###  Matthew in script_runner removing jobfile jobfile-f84ed1dd-e2a3-4235-a7fe-7ee3e3588da4.py  ###
+[2017-11-29 15:23:02,367: INFO/ForkPoolWorker-1] Task app.script_runner[2da2bc55-1358-4f9b-9fb3-665e16960716] succeeded in 3620.8263943400234s: None
