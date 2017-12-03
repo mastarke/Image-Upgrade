@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block body %}
+  <h1>Page or Image Not Found</h1>
+
+  <p>What you were looking for is just not there.<a href="{{ url_for('index') }}"> Return back to Home</a></p>
+
+
+  <img src="static/img/404_error_pic.jpg">
+
+
+
+
+
+{% endblock %}

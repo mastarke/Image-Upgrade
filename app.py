@@ -391,97 +391,101 @@ def image():
 @app.route('/packages', methods=['GET', 'POST'])
 def packages():
 
-    get_score = session.get('get_score', None)
+    try:
 
-    ixia_connection = None
-    ixia_chassis_ip = None
-    install_active_output = None
-    install_commited_output = None
-    os_type = None
+        get_score = session.get('get_score', None)
 
-    if request.method == 'POST':
-        image = request.form['image']
-        platform = request.form['platform']
-        tftp_dir = request.form['tftp_dir']
-        tftp_server_ip = request.form['tftp_server_ip']
-        rtr_mgmt_ip = request.form['rtr_mgmt_ip']
-        rtr_hostname = request.form['rtr_hostname']
-        rtr_username = request.form['rtr_username']
-        rtr_password = request.form['rtr_password']
-    
-        session['platform'] = platform
-        session['tftp_dir'] = tftp_dir
-        session['tftp_server_ip'] = tftp_server_ip
-        session['rtr_mgmt_ip'] = rtr_mgmt_ip
-        session['rtr_hostname'] = rtr_hostname
-        session['rtr_username'] = rtr_username
-        session['rtr_password'] = rtr_password
+        ixia_connection = None
+        ixia_chassis_ip = None
+        install_active_output = None
+        install_commited_output = None
+        os_type = None
 
-        # ATTEMPT TO PING DEVICE 
-        ping_output = os.popen('ping {} -c 5'.format(rtr_mgmt_ip)).read()
-        ping_success_num = re.search(r'\d+ packets transmitted, +\d+ received, +(\d+)% packet loss', ping_output)
-        if int(ping_success_num.group(1)) <= 21:
-            ping_result = True
-        else:
-            app.logger.info('Matthew ping result was not good it was {}'.format(ping_success_num.group(1)))
-            ping_result = False
+        if request.method == 'POST':
+            image = request.form['image']
+            platform = request.form['platform']
+            tftp_dir = request.form['tftp_dir']
+            tftp_server_ip = request.form['tftp_server_ip']
+            rtr_mgmt_ip = request.form['rtr_mgmt_ip']
+            rtr_hostname = request.form['rtr_hostname']
+            rtr_username = request.form['rtr_username']
+            rtr_password = request.form['rtr_password']
+        
+            session['platform'] = platform
+            session['tftp_dir'] = tftp_dir
+            session['tftp_server_ip'] = tftp_server_ip
+            session['rtr_mgmt_ip'] = rtr_mgmt_ip
+            session['rtr_hostname'] = rtr_hostname
+            session['rtr_username'] = rtr_username
+            session['rtr_password'] = rtr_password
 
-        session['ping_result'] = ping_result
+            # ATTEMPT TO PING DEVICE 
+            ping_output = os.popen('ping {} -c 5'.format(rtr_mgmt_ip)).read()
+            ping_success_num = re.search(r'\d+ packets transmitted, +\d+ received, +(\d+)% packet loss', ping_output)
+            if int(ping_success_num.group(1)) <= 21:
+                ping_result = True
+            else:
+                app.logger.info('Matthew ping result was not good it was {}'.format(ping_success_num.group(1)))
+                ping_result = False
 
-        app.logger.info('Matthew ping result is {}'.format(ping_result))
+            session['ping_result'] = ping_result
 
-        if ping_result == True:
-            
-            # GET THE INSTALLED ACTIVE IMAGE ON THE ROUTER
-            install_active_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password)
-            # GET THE INSALLED COMMITED IMAGE ON THE ROUTER
-            install_commited_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password, False)
-           
-            command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
-                         '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
-                         '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))
-            
-            command_output = os.popen(command).read()
+            app.logger.info('Matthew ping result is {}'.format(ping_result))
 
-            dir_found = re.search(r'\/\w+\/\w+\/\w+\/.*', command_output)
-            path = re.sub(r':', '', dir_found.group(0))
-            image_repo = path
-            
-            session['image_repo'] = image_repo
+            if ping_result == True:
+                
+                # GET THE INSTALLED ACTIVE IMAGE ON THE ROUTER
+                install_active_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password)
+                # GET THE INSALLED COMMITED IMAGE ON THE ROUTER
+                install_commited_output = install_image(rtr_mgmt_ip, rtr_username, rtr_password, False)
+               
+                command = ('ls /auto/prod_weekly_archive1/bin/{image}/{platform}  '
+                             '/auto/prod_weekly_archive2/bin/{image}/{platform}  '
+                             '/auto/prod_weekly_archive3/bin/{image}/{platform}'.format(image=image, platform=platform))
+                
+                command_output = os.popen(command).read()
 
-            packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
-            pies = re.findall(r'\w+.*', packages)
-            
-            # GETTING OS TYPE ON ROUTER
-            os_type = rtr_os_type(rtr_mgmt_ip, rtr_username, rtr_password)
-            app.logger.info('Matthe pexpect found router os_type as {}'.format(os_type))
+                dir_found = re.search(r'\/\w+\/\w+\/\w+\/.*', command_output)
+                path = re.sub(r':', '', dir_found.group(0))
+                image_repo = path
+                
+                session['image_repo'] = image_repo
 
-            if request.method == 'POST' and get_score == True:
-                app.logger.info('upgrade with score')
-                ixia_chassis_ip = request.form['ixia_chassis_ip']
-                db_collection = request.form['db_collection']
-                psat_job_file = request.form['psat_job_file']
-                psat_unzip_output_folder = request.form['psat_unzip_output_folder']
+                packages = re.sub(r'\/\w+\/\w+\/\w+\/.*', '', command_output)
+                pies = re.findall(r'\w+.*', packages)
+                
+                # GETTING OS TYPE ON ROUTER
+                os_type = rtr_os_type(rtr_mgmt_ip, rtr_username, rtr_password)
+                app.logger.info('Matthe pexpect found router os_type as {}'.format(os_type))
 
-                session['ixia_chassis_ip'] = ixia_chassis_ip
-                session['db_collection'] = db_collection
-                session['psat_job_file'] = psat_job_file
-                session['psat_unzip_output_folder'] = psat_unzip_output_folder
+                if request.method == 'POST' and get_score == True:
+                    app.logger.info('upgrade with score')
+                    ixia_chassis_ip = request.form['ixia_chassis_ip']
+                    db_collection = request.form['db_collection']
+                    psat_job_file = request.form['psat_job_file']
+                    psat_unzip_output_folder = request.form['psat_unzip_output_folder']
 
-                app.logger.info('Matthew ixia_chassis_ip is {} db_collection is {} psat_job_file is {} psat_unzip_output_folder is {} '.format(ixia_chassis_ip, db_collection, psat_job_file, psat_unzip_output_folder))
+                    session['ixia_chassis_ip'] = ixia_chassis_ip
+                    session['db_collection'] = db_collection
+                    session['psat_job_file'] = psat_job_file
+                    session['psat_unzip_output_folder'] = psat_unzip_output_folder
 
-                try:
-                    ixia = IxNetRestMain(ixia_chassis_ip, '11009')
-                    ixia_connection = True
-                except:
-                    ixia_connection = False
+                    app.logger.info('Matthew ixia_chassis_ip is {} db_collection is {} psat_job_file is {} psat_unzip_output_folder is {} '.format(ixia_chassis_ip, db_collection, psat_job_file, psat_unzip_output_folder))
 
-    return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip, 
-                                             install_active_output=install_active_output, 
-                                             install_commited_output=install_commited_output,
-                                             ixia_connection=ixia_connection, 
-                                             ixia_chassis_ip=ixia_chassis_ip, os_type=os_type, 
-                                             image=image, platform=platform)
+                    try:
+                        ixia = IxNetRestMain(ixia_chassis_ip, '11009')
+                        ixia_connection = True
+                    except:
+                        ixia_connection = False
+
+        return render_template('packages.html',  ping_result=ping_result, rtr_mgmt_ip=rtr_mgmt_ip, 
+                                                 install_active_output=install_active_output, 
+                                                 install_commited_output=install_commited_output,
+                                                 ixia_connection=ixia_connection, 
+                                                 ixia_chassis_ip=ixia_chassis_ip, os_type=os_type, 
+                                                 image=image, platform=platform)
+    except:
+        return render_template('404.html'), 404
 
 
 @app.route('/copycmd', methods=['GET', 'POST'])
@@ -1008,6 +1012,12 @@ def diff_config_checker(runDate, queryKey, singleId):
     return render_template("diff_config.html", runDate=runDate,
                                                 queryKey=queryKey,
                                                 diff_config=diff_config)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 
 
 @celery.task(name='app.script_runner')
