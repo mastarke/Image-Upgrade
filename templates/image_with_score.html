@@ -11,132 +11,109 @@
     <h1>Upgrade router with score</h1>
 </div>
 
-<form class="container" id="needs-validation" novalidate name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
+<form id="needs-validation" data-toggle="validator" role="form" name="HwQueryForm" action="{{ url_for('packages') }}" method="POST">
+
   <div style="padding-left: 1.0em" class="row">
         
-        <label  for="select" class="control-label">Image:</label><br>
-	    <select id="Image" class="form-control" name="image" style="width: 82%" >
-	        {% for item in cur_releases %}
-	            <option value="{{item}}">{{item}}</option>
-	        {% endfor %}
-	    </select>
+      <label  for="select" class="control-label">Image:</label><br>
+      <select id="Image" class="form-control" name="image" style="width: 82%" >
+          {% for item in cur_releases %}
+              <option value="{{item}}">{{item}}</option>
+          {% endfor %}
+      </select>
     </div>
     <br>
     <div style="padding-left: 1.0em" class="row">
-    	<label style="" for="select" class="control-label">Platform:</label><br>
-	    <select id="Platform" class="form-control" name="platform" style="width: 82%" >
-	        <option value="asr9k-x64">asr9k-x64</option>
-	        <option value="asr9k-px">asr9k-px</option>
-	        <option value="ncs5500">ncs5500</option>
-	    </select>
+      <label style="" for="select" class="control-label">Platform:</label><br>
+      <select id="Platform" class="form-control" name="platform" style="width: 82%" >
+          <option value="asr9k-x64">asr9k-x64</option>
+          <option value="asr9k-px">asr9k-px</option>
+          <option value="ncs5500">ncs5500</option>
+      </select>
     </div>
     <br>
 
-    
-    <div class="row">
-        <div class="col-md-10 mb-3">
-          <label for="validationCustom03">TFTP Directory Path:</label>
-          <input type="text" class="form-control" id="validationCustom01" placeholder="TFTP Path" name="tftp_dir" required>
-          <div class="invalid-feedback">
-            Please provide a valid TFTP Path.
-          </div>
-          <br>
-        </div>
+  <div class="row">
+    <div class="col-md-10 mb-3">
+      <div class="form-group">
+        <label for="tftp_dir" class="control-label">TFTP Directory Path:</label>
+        <input type="text" class="form-control" id="tftp_dir" placeholder="/tftpboot/userId/" name="tftp_dir" required>
+        <div class="help-block">Input your TFTP path</div>
+      </div>
     </div>
-    <div class="row">
-        <div class="col-md-3 mb-3">
-          <label for="validationCustom04">TFTP Server IP:</label>
-          <input type="text" class="form-control" id="validationCustom02" placeholder="TFTP Server IP" name="tftp_server_ip" required>
-          <div class="invalid-feedback">
-            Please provide a valid TFTP Server IP.
-          </div>
-        </div>
-    
-    
-        <div class="col-md-3 mb-3">
-          <label for="validationCustom05">RTR Mgmt IP:</label>
-          <input type="text" class="form-control" id="validationCustom03" placeholder="RTR Mgmt IP" name="rtr_mgmt_ip" required>
-          <div class="invalid-feedback">
-            Please provide a valid RTR Mgmt IP.
-          </div>
-          <br>
-        </div>
+  </div>
 
-        <div class="col-md-4 mb-3">
-          <label for="validationCustom05">RTR Hostname:</label>
-          <input type="text" class="form-control" id="validationCustom03" placeholder="RTR Mgmt Hostname" name="rtr_hostname" required>
-          <div class="invalid-feedback">
-            Please provide a valid RTR Mgmt IP.
-          </div>
-          <br>
-        </div>
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <div class="form-group">
+        <label for="tftp_server_ip" class="control-label">TFTP Server IP:</label>
+        <input type="text" class="form-control" id="tftp_server_ip" placeholder="223.255.254.245" name="tftp_server_ip" required>
+      </div>
     </div>
     
-
-     <div class="row">
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">RTR Username:</label>
-          <input type="text" class="form-control" id="validationCustom04" placeholder="Username" name="rtr_username" required>
-          <div class="invalid-feedback">
-            Please provide a valid Router Username.
-          </div>
-          <br>
-        </div>
-
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">RTR Password:</label>
-          <input type="text" class="form-control" id="validationCustom05" placeholder="Password" name="rtr_password" required>
-          <div class="invalid-feedback">
-            Please provide a valid Router Username.
-          </div>
-          <br>
-        </div>
+    <div class="col-md-3 mb-3">
+      <div class="form-group">
+        <label for="rtr_mgmt_ip" class="control-label">RTR Mgmt IP:</label>
+        <input type="text" class="form-control" id="rtr_mgmt_ip" placeholder="rtr mgmt ip" name="rtr_mgmt_ip" required>
+      </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">IXIA Chassis IP:</label>
-          <input type="text" class="form-control" id="validationCustom06" placeholder="Ixia Chassis IP" name="ixia_chassis_ip" required>
-          <div class="invalid-feedback">
-            Please provide a valid IXIA Chassis IP.
-          </div>
-          <br>
-        </div>
-
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">DB Collection name:</label>
-          <input type="text" class="form-control" id="validationCustom07" placeholder="db collection name" name="db_collection" required>
-          <div class="invalid-feedback">
-            Please provide a valid DB collection name.
-          </div>
-          <br>
-        </div>
-    </div>
-
-        <div class="row">
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">PSAT/NEST Job file location:</label>
-          <input type="text" class="form-control" id="validationCustom08" placeholder="job file path" name="psat_job_file" required>
-          <div class="invalid-feedback">
-            Please provide a path to your job file.
-          </div>
-          <br>
-        </div>
-
-        <div class="col-md-5 mb-3">
-          <label for="validationCustom05">Unzip PSAT/NEST folder:</label>
-          <input type="text" class="form-control" id="validationCustom09" placeholder="unzip folder location" name="psat_unzip_output_folder" required>
-          <div class="invalid-feedback">
-            Please provide a valid location to unzip psat/nest results.
-          </div>
-          <br>
-        </div>
-    </div>
-
-    <button class="btn btn-info" type="submit">Next</button>
     
-    <!-- CONTAINTER FOR LOADING OBJECTS  -->
-    <div class="loader-container">
+    <div class="col-md-3 mb-3">
+      <div class="form-group">
+        <label for="rtr_hostname" class="control-label">RTR Hostname:</label>
+        <input type="text" class="form-control" id="rtr_hostname" placeholder="RTR1" name="rtr_hostname" required>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-5 mb-3">
+      <div class="form-group">
+        <label for="rtr_username" class="control-label">RTR Username:</label>
+        <input type="text" class="form-control" id="rtr_username" placeholder="root" name="rtr_username" required>
+      </div>
+    </div>
+
+    <div class="col-md-5 mb-3">
+      <div class="form-group">
+        <label for="rtr_password" class="control-label">RTR Password:</label>
+        <input type="text" class="form-control" id="rtr_password" placeholder="root" name="rtr_password" required>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row">
+      <div class="col-md-5 mb-3">
+        <label for="ixia_chassis_ip">IXIA Chassis IP:</label>
+        <input type="text" class="form-control" id="ixia_chassis_ip" placeholder="Ixia Chassis IP" name="ixia_chassis_ip" required>
+      </div>
+
+      <div class="col-md-5 mb-3">
+        <label for="db_collection">DB Collection name:</label>
+        <input type="text" class="form-control" id="db_collection" placeholder="db collection name" name="db_collection" required>
+      </div>
+    </div>
+    <br>
+
+  <div class="row">
+      <div class="col-md-5 mb-3">
+        <label for="psat_job_file">PSAT/NEST Job file location:</label>
+        <input type="text" class="form-control" id="psat_job_file" placeholder="job file path" name="psat_job_file" required>
+      </div>
+
+      <div class="col-md-5 mb-3">
+        <label for="psat_unzip_output_folder">Unzip PSAT/NEST folder:</label>
+        <input type="text" class="form-control" id="psat_unzip_output_folder" placeholder="unzip folder location" name="psat_unzip_output_folder" required>
+      </div>
+    </div>
+
+   
+  <div class="form-group">
+    <button type="submit" class="btn btn-info">Next</button>
+  </div>
+
+  <div class="loader-container">
       <div class="loader">
         <div class="item item-1"></div>
         <div class="item item-2"></div>
@@ -144,8 +121,7 @@
         <div class="item item-4"></div>
       </div>
   </div>
-
-
+  
 </form>
 
 
@@ -161,24 +137,6 @@
     });    
 </script>
 
-
-<script>
-// Example starter JavaScript for disabling form submissions if there are invalid fields
-(function() {
-  'use strict';
-
-  window.addEventListener('load', function() {
-    var form = document.getElementById('needs-validation');
-    form.addEventListener('submit', function(event) {
-      if (form.checkValidity() === false) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      form.classList.add('was-validated');
-    }, false);
-  }, false);
-})();
-</script>
 
 <script type="text/javascript">
   var myForm = document.getElementById('needs-validation');

@@ -1,0 +1,12 @@
+[2017-12-03 22:33:15,847: INFO/ForkPoolWorker-3] app.script_runner[794b92d8-8bfd-43f1-9478-b39529f56fcd]: ###  Matthew in script_runner celery task  ###
+[2017-12-03 23:10:49,710: INFO/ForkPoolWorker-3] app.script_runner[794b92d8-8bfd-43f1-9478-b39529f56fcd]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2017-12-03 23:10:49,711: INFO/ForkPoolWorker-3] app.script_runner[794b92d8-8bfd-43f1-9478-b39529f56fcd]: ###  Matthew in script_runner removing jobfile jobfile-4c942baa-71e0-4f51-b496-8be992576e9a.py  ###
+[2017-12-03 23:10:49,760: INFO/ForkPoolWorker-3] Task app.script_runner[794b92d8-8bfd-43f1-9478-b39529f56fcd] succeeded in 2253.927147971466s: None
+[2018-01-13 09:24:24,243: INFO/ForkPoolWorker-3] app.script_runner[62bd3ad0-3385-4887-b9ed-9a7e1dcfec53]: ###  Matthew in script_runner celery task  ###
+[2018-01-13 10:06:23,073: INFO/ForkPoolWorker-3] app.script_runner[62bd3ad0-3385-4887-b9ed-9a7e1dcfec53]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2018-01-13 10:06:23,075: INFO/ForkPoolWorker-3] app.script_runner[62bd3ad0-3385-4887-b9ed-9a7e1dcfec53]: ###  Matthew in script_runner removing jobfile jobfile-4dbf610d-1dc4-4b81-b4fc-70bd5a54e718.py  ###
+[2018-01-13 10:06:23,101: INFO/ForkPoolWorker-3] Task app.script_runner[62bd3ad0-3385-4887-b9ed-9a7e1dcfec53] succeeded in 2518.871972307563s: None
+[2018-01-22 17:13:33,302: INFO/ForkPoolWorker-3] app.script_runner[370492ee-090d-488e-bec8-5ad589620987]: ###  Matthew in script_runner celery task  ###
+[2018-01-22 18:27:05,839: INFO/ForkPoolWorker-3] app.script_runner[370492ee-090d-488e-bec8-5ad589620987]: ###  !!!  Matthew in script_runner celery has now completed  !!!  ###
+[2018-01-22 18:27:05,841: INFO/ForkPoolWorker-3] app.script_runner[370492ee-090d-488e-bec8-5ad589620987]: ###  Matthew in script_runner removing jobfile jobfile-3b496bc5-30e1-46ef-8221-f592871a7ddd.py  ###
+[2018-01-22 18:27:05,864: INFO/ForkPoolWorker-3] Task app.script_runner[370492ee-090d-488e-bec8-5ad589620987] succeeded in 4412.589024130255s: None

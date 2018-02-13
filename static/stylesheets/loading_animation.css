@@ -13,78 +13,67 @@
   /* hide it at first */
   display: none;
 }
-
 .loader {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
+    display: block;
+    position: relative;
+    left: 50%;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    margin: -75px 0 0 -75px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #9370DB;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
 }
-
-.item {
-  width: 100px;
-  height: 100px;
-  position: absolute;
+.loader:before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #BA55D3;
+    -webkit-animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite;
 }
-
-.item-1 {
-  background-color: #FA5667;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  animation: item-1_move 1.8s cubic-bezier(.6,.01,.4,1) infinite;
+.loader:after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #FF00FF;
+    -webkit-animation: spin 1.5s linear infinite;
+    animation: spin 1.5s linear infinite;
 }
-
-.item-2 {
-  background-color: #7A45E5;
-  top: 0;
-  right: 0;
-  animation: item-2_move 1.8s cubic-bezier(.6,.01,.4,1) infinite;
+@-webkit-keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
-
-.item-3 {
-  background-color: #1B91F7;
-  bottom: 0;
-  right: 0;
-  z-index: 1;
-  animation: item-3_move 1.8s cubic-bezier(.6,.01,.4,1) infinite;
-}
-
-.item-4 {
-  background-color: #FAC24C;
-  bottom: 0;
-  left: 0;
-  animation: item-4_move 1.8s cubic-bezier(.6,.01,.4,1) infinite;
-}
-
-@keyframes item-1_move {
-  0%, 100% {transform: translate(0, 0)} 
-  25% {transform: translate(0, 100px)} 
-  50% {transform: translate(100px, 100px)} 
-  75% {transform: translate(100px, 0)} 
-}
-
-@keyframes item-2_move {
-  0%, 100% {transform: translate(0, 0)} 
-  25% {transform: translate(-100px, 0)} 
-  50% {transform: translate(-100px, 100px)} 
-  75% {transform: translate(0, 100px)} 
-}
-
-@keyframes item-3_move {
-  0%, 100% {transform: translate(0, 0)} 
-  25% {transform: translate(0, -100px)} 
-  50% {transform: translate(-100px, -100px)} 
-  75% {transform: translate(-100px, 0)} 
-}
-
-@keyframes item-4_move {
-  0%, 100% {transform: translate(0, 0)} 
-  25% {transform: translate(100px, 0)} 
-  50% {transform: translate(100px, -100px)} 
-  75% {transform: translate(0, -100px)} 
+@keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }

@@ -313,8 +313,6 @@ class Common_setup(aetest.CommonSetup):
     """Common Setup section."""
 
 
-
-
     # IMPORT THE JOBFILE INTO NAMESPACE
     jobfile = runtime.job.name  # GET JOB FILE NAME
     a = importlib.import_module(jobfile)  # IMPORT THE JOB FILE INTO NAMESPACE
@@ -502,7 +500,7 @@ class ImageUpgrade(aetest.Testcase):
         for item in images:
             for cur_pie in current_image_pies:
                 # ONLY GETTING THE PIES THAT ARE ACTIVE ON TESTBED
-                if cur_pie in item and 'V2' not in item and '99' not in item:
+                if cur_pie in item and 'V2' not in item and '99' not in item and 'migrate' not in item:
                     copy_cmd =  'cp' + ' ' + cs.image_repo + '/' + item + ' ' + '{}'.format(cs.user_tftp_dir)
                     all_images += str(item) + ' '
                     all_images_list.append(item)

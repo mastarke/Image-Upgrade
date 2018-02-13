@@ -4,25 +4,28 @@ import os
 
 class ScriptArgs(object):
     """script related arguments"""
-    # MATTHEW CELERY JOB FILE
+    # CELERY JOB FILE
 
-    get_score = True
+    get_score = False
 
-    testbed_file = ('testbed.yaml')
-    rtr = 'R6'
-    image_repo = '/auto/prod_weekly_archive1/bin/6.3.2.18I.SIT_IMAGE/asr9k-x64'
+    testbed_file = ('testbed-f04fa384-8758-45cb-9a68-a4284a9a8118.yaml')
+    rtr = 'SS'
+    image_repo = '/auto/prod_weekly_archive1/bin/6.4.1.29I.SIT_IMAGE/asr9k-x64'
     user_tftp_dir = '/auto/tftp-merit/mastarke/'
-    tftp_ip = '223.255.254.245'
+    tftp_ip = '233.255.254.253'
     platform = 'asr9k-x64'
 
     ### DATABASE ARGS ###
     db_host = 'mastarke-lnx-v2'
     db_name = 'meritDB'
-    db_collection = 'meritData'
+    db_collection = 'None'
 
     ### PSAT ARGS ###
-    psat_unzip_output_folder = '/auto/tftp-sjc-users2/mastarke/psat/r6'
-    psat_job_file = '/auto/nest/ats5.3.0/mastarke/jobs/R6-repeat-trigger-psat.job'
+    psat_unzip_output_folder = 'None'
+    psat_job_file = 'None'
+
+    # IXIA_CHASSIS
+    ixia_chassis_ip = 'None'
 
 
 def main():
